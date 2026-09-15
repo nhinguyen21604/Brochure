@@ -1,0 +1,12 @@
+{
+  "url": "https://nhinguyen21604.github.io/Brochure/",
+  "modules": 29,
+  "scale": 20,
+  "margin": 4,
+  "errorCorrection": "M",
+  "generatedAt": "2026-09-15T15:59:34.472Z",
+  "files": {
+    "svg": "qr-brochure.svg",
+    "png": "qr-brochure.png"
+  }
+}
