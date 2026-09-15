@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mã QR — in và dán lên brochure</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap">
+<style>
+  :root { --ink:#0f172a; --muted:#64748b; --brand:#0e7c6b; --line:#e2e8f0; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1.25rem; background: #f6f7f9; color: var(--ink);
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: grid; place-items: center; min-height: 100vh;
+  }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 2rem; max-width: 560px; width: 100%; text-align: center; box-shadow: 0 20px 50px -30px rgba(15,23,42,.4); }
+  h1 { font-size: 1.25rem; margin: 0 0 .35rem; }
+  .sub { color: var(--muted); font-size: .9rem; margin: 0 0 1.4rem; }
+  .qrBox { display: grid; place-items: center; margin-bottom: 1.1rem; }
+  canvas { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; max-width: min(80vw, 380px); height: auto; }
+  .link { font-size: .85rem; color: var(--brand); word-break: break-all; margin: 0 0 1.4rem; }
+  .rows { display: grid; gap: .55rem; text-align: left; font-size: .85rem; color: var(--muted); }
+  .rows label { display: flex; align-items: center; gap: .5rem; }
+  input[type=url] { flex: 1; font: inherit; font-size: .85rem; padding: .5rem .7rem; border: 1px solid var(--line); border-radius: 10px; }
+  .btns { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1.3rem; }
+  button, .btn { font: inherit; font-weight: 600; font-size: .88rem; padding: .6rem 1.1rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; text-decoration: none; }
+  button.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .tip { margin: 1.4rem 0 0; font-size: .78rem; color: var(--muted); }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .card { border: 0; box-shadow: none; border-radius: 0; padding: .5cm; max-width: none; }
+    .noPrint, .rows, .btns, .tip { display: none !important; }
+    canvas { border: 0; padding: 0; width: 6cm; height: auto; }
+    h1 { font-size: 12pt; }
+    .link { font-size: 9pt; }
+  }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>Quét mã QR để xem brochure</h1>
+    <p class="sub">Scan the QR code to open our brochure</p>
+
+    <div class="qrBox"><canvas id="qr" width="360" height="360" role="img" aria-label="Mã QR dẫn tới trang brochure"></canvas></div>
+    <p class="link" id="linkText">—</p>
+
+    <div class="rows noPrint">
+      <label for="url"><span>Link trong mã / Link:</span></label>
+      <input id="url" type="url" spellcheck="false" placeholder="https://…">
+    </div>
+
+    <div class="btns noPrint">
+      <button type="button" class="primary" id="print">In trang này</button>
+      <button type="button" id="png">Tải PNG</button>
+      <button type="button" id="svg">Tải SVG</button>
+      <a class="btn" href="./">Về trang brochure</a>
+    </div>
+
+    <p class="tip noPrint">Mẹo: khi in bằng Chrome, chọn khổ giấy A4, bỏ chọn “Headers and footers”, và giữ nguyên vùng trắng quanh mã.</p>
+  </main>
+
+  <script src="vendor/qrcode.js"></script>
+  <script src="assets/js/qr-utils.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    (function () {
+      var cfg = window.SITE_CONFIG || {};
+      var params = new URLSearchParams(location.search);
+      var url = params.get("u") || cfg.url || location.href;
+      var input = document.getElementById("url");
+      var canvas = document.getElementById("qr");
+      var linkText = document.getElementById("linkText");
+      var scale = 10;
+
+      function render(value) {
+        if (!value) return;
+        try {
+          var count = QRUtils.matrix(value).count;
+          scale = Math.max(4, Math.floor(360 / (count + 8)));
+          QRUtils.toCanvas(canvas, value, { scale: scale, margin: 4, dark: "#0f172a", light: "#ffffff" });
+        } catch (err) {
+          linkText.textContent = "⚠ " + err.message;
+          return;
+        }
+        linkText.textContent = value;
+        document.title = "Mã QR — " + value;
+      }
+
+      input.value = url;
+      render(url);
+
+      input.addEventListener("input", function () {
+        var value = input.value.trim();
+        if (value) render(value);
+      });
+      document.getElementById("print").addEventListener("click", function () { window.print(); });
+      document.getElementById("png").addEventListener("click", function () {
+        canvas.toBlob(function (blob) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "qr-brochure.png";
+          a.click();
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+        }, "image/png");
+      });
+      document.getElementById("svg").addEventListener("click", function () {
+        var str = QRUtils.toSvg(input.value.trim() || url, { scale: 12, margin: 4, dark: "#0f172a" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([str], { type: "image/svg+xml" }));
+        a.download = "qr-brochure.svg";
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brochure nhóm 4 — bản tiếng Việt &amp; tiếng Anh</title>
+<meta name="description" content="Brochure 2 mặt song ngữ (Việt – Anh) và thông tin thành viên nhóm 4: Tô Thanh Mai, Bùi Trần Trà My, Nguyễn Ngọc Hoàng Nhi, Nguyễn Ngọc Thảo Nguyên.">
+<meta name="theme-color" content="#0f766e">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/img/favicon.svg">
+<!-- OG/Twitter dùng link tuyệt đối vì các nền tảng mạng xã hội không đọc được đường dẫn tương đối.
+     Sau khi deploy, nhớ đổi 3 link dưới đây cho khớp SITE_CONFIG.url trong assets/js/config.js -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nhinguyen21604.github.io/Brochure/">
+<meta property="og:title" content="Brochure nhóm 4 — bản tiếng Việt &amp; tiếng Anh">
+<meta property="og:description" content="Quét mã QR trên brochure để mở trang này: xem 2 mặt brochure và thông tin nhóm.">
+<meta property="og:image" content="https://nhinguyen21604.github.io/Brochure/assets/img/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Hai mặt brochure và mã QR của nhóm 4">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300..800;1,400&family=Playfair+Display:ital,wght@0,500..800;1,600&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Chuyển tới nội dung chính</a>
+
+<header class="topbar" id="top">
+  <div class="wrap topbar__inner">
+    <a class="brand" href="#top">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+          <rect x="1" y="1" width="12" height="12" rx="2.5"/>
+          <rect x="19" y="1" width="12" height="12" rx="2.5"/>
+          <rect x="1" y="19" width="12" height="12" rx="2.5"/>
+          <rect x="19" y="19" width="12" height="12" rx="2.5" class="dot"/>
+        </svg>
+      </span>
+      <span class="brand__text">
+        <strong data-i18n="brand.name">Nhóm 4</strong>
+        <small data-i18n="brand.sub">Brochure song ngữ</small>
+      </span>
+    </a>
+
+    <nav class="topnav" aria-label="Mục lục">
+      <a href="#brochure" data-nav data-i18n="nav.brochure">Brochure</a>
+      <a href="#team" data-nav data-i18n="nav.team">Thành viên</a>
+      <a href="#qr" data-nav data-i18n="nav.qr">Mã QR</a>
+    </nav>
+
+    <div class="lang" role="group" aria-label="Ngôn ngữ / Language">
+      <button type="button" class="lang__btn" data-lang-btn="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang__btn" data-lang-btn="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================ HERO ============================ -->
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <div class="hero__copy">
+        <p class="eyebrow reveal"><span class="pill" data-i18n="hero.badge">Brochure 2 mặt · Song ngữ</span></p>
+        <h1 class="hero__title reveal" id="heroTitle">Brochure giới thiệu</h1>
+        <p class="hero__group reveal"><span id="heroGroup">Nhóm 4</span></p>
+        <p class="hero__sub reveal" id="heroSub">Sản phẩm brochure 2 mặt — bản tiếng Việt &amp; bản tiếng Anh, kèm thông tin các thành viên trong nhóm.</p>
+        <ul class="hero__meta reveal" id="heroMeta" hidden></ul>
+        <div class="hero__cta reveal">
+          <a class="btn btn--primary" href="#brochure" data-i18n="hero.cta">Xem brochure</a>
+          <a class="btn btn--ghost" href="#qr" data-i18n="hero.cta2">Lấy mã QR</a>
+        </div>
+        <p class="hero__note reveal" data-i18n="hero.note">Quét mã QR để mở đúng trang này trên điện thoại.</p>
+      </div>
+
+      <div class="hero__art reveal" aria-hidden="true">
+        <div class="mock">
+          <div class="mock__sheet mock__sheet--vi">
+            <span class="mock__badge">VI</span>
+            <span class="mock__line mock__line--lg"></span>
+            <span class="mock__line"></span>
+            <span class="mock__line mock__line--sm"></span>
+            <span class="mock__blob"></span>
+          </div>
+          <div class="mock__sheet mock__sheet--en">
+            <span class="mock__badge">EN</span>
+            <span class="mock__line mock__line--lg"></span>
+            <span class="mock__line"></span>
+            <span class="mock__line mock__line--sm"></span>
+            <span class="mock__blob mock__blob--alt"></span>
+          </div>
+          <div class="mock__qr">
+            <div class="mock__qrGrid"></div>
+            <small>Scan</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== BROCHURE ========================== -->
+  <section class="section" id="brochure">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow" data-i18n="brochure.eyebrow">Sản phẩm</p>
+        <h2 class="section__title" data-i18n="brochure.title">Brochure của nhóm</h2>
+        <p class="section__desc" data-i18n="brochure.desc">Bấm vào ảnh để xem lớn. Dùng nút chuyển ngôn ngữ ở trên để xem bản tiếng Việt hoặc tiếng Anh.</p>
+      </header>
+
+      <div class="faces" id="brochureFaces" style="--faces:2"></div>
+      <p class="swipeHint" data-i18n="brochure.viewerHint">Kéo ngang để xem mặt còn lại</p>
+    </div>
+  </section>
+
+  <!-- ============================ TEAM ============================ -->
+  <section class="section section--alt" id="team">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow" data-i18n="team.eyebrow">Nhóm thực hiện</p>
+        <h2 class="section__title">
+          <span data-i18n="team.title">Thành viên nhóm</span>
+          <span class="count" data-i18n="team.count">4 thành viên</span>
+        </h2>
+        <p class="section__desc" data-i18n="team.desc">Nhóm 4 thành viên cùng thực hiện nội dung, thiết kế và bản dịch brochure.</p>
+      </header>
+      <div class="members" id="memberGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============================= QR ============================= -->
+  <section class="section" id="qr">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow" data-i18n="qr.eyebrow">Chia sẻ</p>
+        <h2 class="section__title" data-i18n="qr.title">Mã QR mở trang này</h2>
+        <p class="section__desc" data-i18n="qr.desc">In mã này lên brochure hoặc trình chiếu trên lớp — người xem quét là mở ngay trang web.</p>
+      </header>
+
+      <div class="qrCard reveal">
+        <div class="qrCard__code">
+          <canvas id="qrCanvas" width="320" height="320" role="img" aria-label="Mã QR dẫn tới trang brochure"></canvas>
+          <p class="qrCard__scan" data-i18n="qr.scan">Quét để mở brochure</p>
+        </div>
+
+        <div class="qrCard__side">
+          <label class="field">
+            <span class="field__label" data-i18n="qr.urlLabel">Link đang gán trong mã QR</span>
+            <input id="qrUrl" class="field__input" type="url" inputmode="url" spellcheck="false"
+                   value="" placeholder="https://…">
+          </label>
+          <p class="field__help" data-i18n="qr.urlHelp">Đổi link ở đây để xem trước, hoặc sửa trong assets/js/config.js để lưu cố định.</p>
+
+          <p class="qrCard__link">
+            <a id="qrLink" href="#" target="_blank" rel="noopener">—</a>
+          </p>
+
+          <div class="btnRow">
+            <button type="button" class="btn btn--primary btn--sm" id="qrPng" data-i18n="qr.downloadPng">Tải PNG</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="qrSvg" data-i18n="qr.downloadSvg">Tải SVG</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="qrCopy" data-i18n="qr.copy">Sao chép link</button>
+            <a class="btn btn--ghost btn--sm" href="qr-print.html" target="_blank" rel="noopener"
+               data-qr-print data-i18n="qr.print">Trang in QR</a>
+          </div>
+
+          <ul class="tips">
+            <li data-i18n="qr.tip1">Giữ khoảng trắng (vùng trắng) quanh mã khi in, mã cần tương phản tốt.</li>
+            <li data-i18n="qr.tip2">Kích thước in gợi ý: tối thiểu 2 × 2 cm, tốt nhất 3 × 3 cm.</li>
+            <li data-i18n="qr.tip3">Sau khi deploy, mở tools/README-qr.md để xuất lại mã QR với link mới.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <div>
+      <p class="footer__made"><span data-i18n="footer.madeBy">Thực hiện bởi nhóm 4</span> · <span id="year">2026</span></p>
+      <p class="footer__note" data-i18n="footer.note">Trang web tĩnh — có thể đưa lên GitHub Pages, Netlify hoặc Vercel.</p>
+      <p class="footer__names" id="footerNames"></p>
+    </div>
+    <a class="footer__top" href="#top" data-i18n="footer.top">Về đầu trang</a>
+  </div>
+</footer>
+
+<!-- =========================== LIGHTBOX =========================== -->
+<div class="lb" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Xem brochure">
+  <div class="lb__bar">
+    <span class="lb__caption">1/2</span>
+    <div class="lb__tools">
+      <button type="button" class="lb__btn" data-lb-zoom
+              data-i18n-attr="title:brochure.zoom; aria-label:brochure.zoom">⤢</button>
+      <a class="lb__btn" data-lb-open href="#" hidden target="_blank" rel="noopener"
+         data-i18n-attr="title:lightbox.openRaw; aria-label:lightbox.openRaw">↗</a>
+      <button type="button" class="lb__btn" data-close
+              data-i18n-attr="title:lightbox.close; aria-label:lightbox.close">✕</button>
+    </div>
+  </div>
+  <button type="button" class="lb__nav lb__nav--prev" data-lb-prev
+          data-i18n-attr="title:lightbox.prev; aria-label:lightbox.prev">‹</button>
+  <div class="lb__stage"><div class="lb__empty">…</div></div>
+  <button type="button" class="lb__nav lb__nav--next" data-lb-next
+          data-i18n-attr="title:lightbox.next; aria-label:lightbox.next">›</button>
+</div>
+
+<script src="vendor/qrcode.js"></script>
+<script src="assets/js/qr-utils.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
