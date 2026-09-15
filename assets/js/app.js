@@ -226,22 +226,28 @@
   function paint(card, face, src) {
     face.src = src;
     const frame = $(".face__frame", card);
-    const loading = $(".face__loading", frame);
-    if (loading) loading.remove();
+    frame.innerHTML = "";
+
+    // Cả tấm ảnh là một nút: bấm (hoặc Enter/Space) để mở xem lớn
+    const openBtn = document.createElement("button");
+    openBtn.type = "button";
+    openBtn.className = "face__open";
+    openBtn.setAttribute("aria-label", `${t("brochure.zoom")} — ${face.label}`);
 
     const img = document.createElement("img");
     img.src = src;
     img.alt = `${face.label} — ${tr(CFG.title)}`;
     img.loading = "lazy";
     img.decoding = "async";
-    frame.appendChild(img);
 
-    const zoom = document.createElement("button");
-    zoom.type = "button";
-    zoom.className = "face__zoom";
-    zoom.innerHTML = `<span aria-hidden="true">⤢</span> ${escapeHtml(t("brochure.zoom"))}`;
-    zoom.addEventListener("click", () => openLightbox(Number(card.dataset.index)));
-    card.appendChild(zoom);
+    const hint = document.createElement("span");
+    hint.className = "face__hint";
+    hint.setAttribute("aria-hidden", "true");
+    hint.textContent = `⤢ ${t("brochure.zoom")}`;
+
+    openBtn.append(img, hint);
+    openBtn.addEventListener("click", () => lightbox.open(Number(card.dataset.index)));
+    frame.appendChild(openBtn);
 
     const actions = $(".face__actions", card);
     actions.setAttribute("data-internal", "");   // công cụ tải ảnh: chỉ nhóm thấy

@@ -183,6 +183,8 @@ console.log(`✔ Nội dung mã QR : ${url}`);
 console.log(`✔ Số ô (modules): ${count} × ${count}  (+ viền ${margin} ô)`);
 console.log(`✔ ${path.relative(ROOT, svgFile)}  (vector — dùng khi in)`);
 console.log(`✔ ${path.relative(ROOT, pngFile)}  (${px} × ${px} px — dùng cho slide/mạng xã hội)`);
-if (/example\.com|nhinguyen21604\.github\.io\/Brochure\/$/.test(url)) {
-  console.log("\n⚠ Bạn đang dùng link mẫu. Sau khi deploy, sửa SITE_CONFIG.url trong assets/js/config.js rồi chạy lại lệnh này.");
+if (/example\.com|localhost|127\.0\.0\.1|your-domain|\/$/.test(url) && !/^https:\/\/[^/]+\/[^/]*\/$/.test(url)) {
+  console.log("\n⚠ Link này trông chưa phải link thật. Sửa SITE_CONFIG.url trong assets/js/config.js rồi chạy lại lệnh này.");
+} else {
+  console.log("\n→ Nhớ kiểm tra link sống trước khi in: npm run live");
 }

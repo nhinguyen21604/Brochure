@@ -8,8 +8,9 @@ Tài liệu này dành cho nhóm 1 — làm theo thứ tự là xong.
 npm start          # rồi mở http://localhost:4173/
 ```
 
-Bạn sẽ thấy: phần giới thiệu → 2 khung brochure (đang là “chưa có ảnh”) → 4 thẻ thành viên → khối mã QR.
-Nút **VI / EN** ở góc phải thanh trên cùng đổi ngôn ngữ cho phần giao diện.
+Bạn sẽ thấy đúng thứ tự: một khối giới thiệu rất gọn (tên nhóm + tiêu đề) → **2 mặt brochure chiếm gần trọn màn hình** → dải gọn 4 thành viên → *(chỉ ở chế độ nội bộ)* khối mã QR.
+Nút **VI / EN** ở góc phải thanh trên cùng đổi ngôn ngữ; ảnh brochure cũng đổi theo bản tiếng Việt / tiếng Anh.
+Bấm vào bất kỳ ảnh brochure nào để mở xem lớn (phím ← → để đổi mặt, ESC để đóng, kéo/vuốt trên điện thoại).
 
 ## Bước 1 — Sửa thông tin nhóm (1 phút)
 
@@ -23,7 +24,7 @@ Mở `assets/js/config.js`, sửa các mục:
 ## Bước 2 — Chèn ảnh brochure
 
 1. Xuất 2 mặt brochure thành ảnh (File → Export trong Canva/Photoshop/Illustrator/Figma):
-   - Định dạng JPG hoặc PNG, **chiều rộng 1500–2000 px**, nên nén để mỗi file dưới ~1,5 MB cho đường truyền lớp học.
+   - Định dạng JPG hoặc PNG, **dài cạnh 1600–2400 px** (ảnh sẽ hiển thị gần trọn màn hình, và còn dùng khi bấm xem lớn), nên nén để mỗi file dưới ~1,5 MB cho đường truyền lớp học.
    - Nếu brochure là bản gấp đôi: xuất **mỗi mặt thành 1 ảnh riêng** (mặt ngoài / mặt trong) để dễ xem.
 2. Bỏ vào đúng thư mục:
 
@@ -49,9 +50,12 @@ fileNames: {
 
 ## Bước 3 — Lấy link thật và tạo mã QR
 
-1. Đưa web lên mạng. Cách nhanh với GitHub (repo này đã có sẵn):
+1. Đưa web lên mạng (làm một lần, khoảng 1 phút):
+   - **Merge PR** trên GitHub để nội dung vào nhánh `main`.
+     *Muốn thử ngay không cần merge:* **Settings → Pages → Source: Deploy from a branch → Branch: `arena/01a0a585-brochure` / `(root)` → Save*.
    - Vào **Settings → Pages**, chọn **Source: Deploy from a branch**, **Branch: `main` / `(root)`** → Save.
-   - Sau ~1 phút, web có tại `https://nhinguyen21604.github.io/Brochure/`.
+   - Kiểm tra lại trên máy bạn: `npm run live` (báo HTTP 200 và thấy đúng “Nhóm 1”, khung brochure, 4 MSSV).
+     Lệnh này cần internet nên hãy chạy ở máy bạn, không chạy trong môi trường sandbox.
    - *Lưu ý:* nếu repo là riêng tư, GitHub Pages chỉ chạy khi tài khoản có gói hỗ trợ — nhóm có thể đổi sang Netlify/Vercel (kéo–thả thư mục) hoặc để repo ở chế độ công khai.
 2. Sửa `SITE_CONFIG.url` trong `assets/js/config.js` thành link thật (giữ `/` ở cuối).
 3. Xuất lại mã QR và mở trang in:
@@ -62,13 +66,16 @@ fileNames: {
 
    Trên web, mở chế độ nội bộ `index.html?tools=1` → bấm **Trang in QR** (hoặc mở thẳng `qr-print.html`) rồi in ở khổ A4.
 4. Dán mã lên brochure (gợi ý 3 × 3 cm, xem `tools/README-qr.md`) và **quét thử bằng ít nhất 2 điện thoại**.
+   File để dán là `assets/qr/qr-brochure.svg` (in) hoặc `assets/qr/qr-brochure.png` (dán vào Word/slide) —
+   cả hai đã được kiểm tra là giải mã ra đúng link.
 
 ## Bước 4 — Kiểm tra cuối cùng
 
 - [ ] Mở link bằng điện thoại: trang hiển thị đúng, ảnh brochure rõ, không tràn ngang.
 - [ ] Nút VI/EN đổi đúng nội dung giao diện; nút phóng to ảnh hoạt động.
-- [ ] 4 thẻ thành viên hiện đủ tên + MSSV, đúng chính tả (nhớ dấu tiếng Việt).
-- [ ] Quét mã QR từ **bản in giấy** → mở đúng trang.
+- [ ] 4 thành viên hiện đủ tên + MSSV, đúng chính tả (nhớ dấu tiếng Việt).
+- [ ] Quét mã QR từ **bản in giấy** → mở đúng trang (thử 2 điện thoại, 2 app camera khác nhau).
+- [ ] `npm run live` báo HTTP 200 — link QR thật sự mở được.
 - [ ] Không còn chữ “chưa có ảnh” nào trên trang.
 - [ ] `npm run check` báo “Mọi thứ sẵn sàng!”.
 
@@ -93,6 +100,9 @@ Mở `assets/css/style.css`, sửa biến `--brand` và `--accent` ở khối `:
 
 **Mã QR quét không ra?**
 Xem `tools/README-qr.md` — thường là do in quá nhỏ, mất vùng trắng quanh mã, hoặc in mã nhạt.
+
+**Vì sao mã QR quét không mở được?**
+Kiểm tra theo thứ tự: (1) `npm run live` xem link đã lên mạng chưa — nếu chưa thì bật GitHub Pages; (2) link trong `assets/js/config.js` có khớp link thật không, nếu khác thì chạy lại `npm run qr`; (3) mã in có bị nhỏ quá (< 2 cm) hoặc mất vùng trắng quanh mã không.
 
 **Sao tôi mở link mà không thấy nút tải QR?**
 Đúng như thiết kế — công cụ chỉ hiện ở chế độ nội bộ: thêm `?tools=1` vào cuối link (ví dụ `.../index.html?tools=1`).

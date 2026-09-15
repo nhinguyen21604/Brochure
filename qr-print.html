@@ -19,7 +19,8 @@
   h1 { font-size: 1.25rem; margin: 0 0 .35rem; }
   .sub { color: var(--muted); font-size: .9rem; margin: 0 0 1.4rem; }
   .qrBox { display: grid; place-items: center; margin-bottom: 1.1rem; }
-  canvas { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; max-width: min(80vw, 380px); height: auto; }
+  canvas, #qrFixed { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; max-width: min(80vw, 380px); height: auto; }
+  #qrFixed[hidden], canvas[hidden] { display: none; }
   .link { font-size: .85rem; color: var(--brand); word-break: break-all; margin: 0 0 1.4rem; }
   .rows { display: grid; gap: .55rem; text-align: left; font-size: .85rem; color: var(--muted); }
   .rows label { display: flex; align-items: center; gap: .5rem; }
@@ -32,7 +33,7 @@
     body { background: #fff; padding: 0; }
     .card { border: 0; box-shadow: none; border-radius: 0; padding: .5cm; max-width: none; }
     .noPrint, .rows, .btns, .tip { display: none !important; }
-    canvas { border: 0; padding: 0; width: 6cm; height: auto; }
+    canvas, #qrFixed { border: 0; padding: 0; width: 6cm; height: auto; }
     h1 { font-size: 12pt; }
     .link { font-size: 9pt; }
   }
@@ -40,10 +41,13 @@
 </head>
 <body>
   <main class="card">
-    <h1>Quét mã QR để xem brochure</h1>
-    <p class="sub">Scan the QR code to open our brochure</p>
+    <h1 id="headline">Quét mã QR để xem brochure</h1>
+    <p class="sub" id="subline">Scan the QR code to open our brochure</p>
 
-    <div class="qrBox"><canvas id="qr" width="360" height="360" role="img" aria-label="Mã QR dẫn tới trang brochure"></canvas></div>
+    <div class="qrBox">
+      <img id="qrFixed" src="assets/qr/qr-brochure.png" alt="Mã QR dẫn tới trang brochure" hidden>
+      <canvas id="qr" width="360" height="360" role="img" aria-label="Mã QR dẫn tới trang brochure"></canvas>
+    </div>
     <p class="link" id="linkText">—</p>
 
     <div class="rows noPrint">
@@ -69,6 +73,12 @@
       var cfg = window.SITE_CONFIG || {};
       var params = new URLSearchParams(location.search);
       var url = params.get("u") || cfg.url || location.href;
+      var group = (cfg.group && (cfg.group.vi || cfg.group.en)) || "";
+      var title = (cfg.title && (cfg.title.vi || cfg.title.en)) || "";
+      if (group || title) {
+        document.getElementById("headline").textContent = group + (title ? " · " + title : "");
+        document.getElementById("subline").textContent = "Quét mã để xem brochure · Scan to open the brochure";
+      }
       var input = document.getElementById("url");
       var canvas = document.getElementById("qr");
       var linkText = document.getElementById("linkText");
@@ -89,7 +99,33 @@
       }
 
       input.value = url;
-      render(url);
+
+      /* Mặc định in đúng file QR cố định trong assets/qr (đã xuất bằng npm run qr).
+         Chỉ vẽ lại bằng canvas khi bạn nhập link khác để xem trước. */
+      var fixedImg = document.getElementById("qrFixed");
+      var custom = params.get("u");
+      function useFixed() {
+        if (custom) return false;
+        return !!(cfg.url && url === cfg.url);
+      }
+      function showFixed() {
+        canvas.hidden = true;
+        fixedImg.hidden = false;
+      }
+      fixedImg.addEventListener("error", function () {   // chưa có file → vẽ bằng canvas
+        fixedImg.hidden = true; canvas.hidden = false; render(url);
+      });
+      if (useFixed()) {
+        showFixed();
+      } else {
+        canvas.hidden = false;
+        render(url);
+      }
+      input.addEventListener("input", function () {
+        custom = input.value.trim() === cfg.url ? null : "1";
+        if (useFixed()) { showFixed(); }
+        else { fixedImg.hidden = true; canvas.hidden = false; render(input.value.trim()); }
+      });
 
       input.addEventListener("input", function () {
         var value = input.value.trim();
