@@ -14,6 +14,38 @@
   const LANG_KEY = "brochure-lang";
   const URL_KEY = "brochure-qr-url";
 
+  /* ------------------------------------------------- Chế độ công khai / nội bộ
+   * Người ngoài chỉ thấy brochure + thành viên. Các phần đánh dấu
+   * [data-internal] (bảng công cụ QR, ghi chú kỹ thuật, đường dẫn file ảnh)
+   * chỉ hiện khi mở bằng ?tools=1 — dùng cho nhóm. */
+  const UI = CFG.ui || {};
+  const isTools = !!(
+    UI.allowToolsQuery !== false &&
+    new URLSearchParams(location.search).get("tools")
+  );
+
+  /* ---------------------------------------- Ẩn/hiện phần nội bộ của nhóm */
+  function applyVisibility() {
+    const showQrSection = isTools || UI.showQrSection === true;
+
+    $$("[data-internal]").forEach((el) => {
+      el.hidden = !isTools;
+    });
+
+    const qrSection = $("[data-qr-section]");
+    if (qrSection) qrSection.hidden = !showQrSection;
+    $$("[data-qr-cta]").forEach((el) => {
+      el.hidden = !showQrSection;
+    });
+
+    // khi bảng công cụ bị ẩn, khối QR chỉ còn hình mã → canh giữa cho gọn
+    const card = $(".qrCard");
+    const side = $(".qrCard__side", card || document);
+    if (card && side) card.classList.toggle("qrCard--solo", side.hidden);
+
+    document.body.classList.toggle("is-tools", isTools);
+  }
+
   /* ---------------------------------------------------------------- Đa ngữ */
   const DICTS = CFG.i18n || {};
   let lang = detectLang();
@@ -170,6 +202,8 @@
 
       const actions = document.createElement("div");
       actions.className = "face__actions";
+      actions.setAttribute("data-internal", ""); // công cụ tải ảnh: chỉ nhóm thấy
+      actions.hidden = !isTools;
 
       card.append(label, frame, actions);
       host.appendChild(card);
@@ -210,6 +244,8 @@
     card.appendChild(zoom);
 
     const actions = $(".face__actions", card);
+    actions.setAttribute("data-internal", "");   // công cụ tải ảnh: chỉ nhóm thấy
+    actions.hidden = !isTools;
     const dl = document.createElement("a");
     dl.className = "btn btn--ghost btn--sm";
     dl.href = src;
@@ -232,6 +268,16 @@
 
   function paintMissing(card, face) {
     const frame = $(".face__frame", card);
+    if (!isTools) {
+      // người ngoài chỉ thấy thông báo trung tính, không lộ cấu trúc file
+      frame.innerHTML =
+        `<div class="ph">` +
+        `<div class="ph__icon" aria-hidden="true">📄</div>` +
+        `<p class="ph__title">${escapeHtml(t("brochure.pending.title"))}</p>` +
+        `<p class="ph__desc">${escapeHtml(t("brochure.pending.desc"))}</p>` +
+        `</div>`;
+      return;
+    }
     const expected = face.candidates[0] || "";
     frame.innerHTML =
       `<div class="ph">` +
@@ -311,9 +357,11 @@
         stage.appendChild(img);
         const open = $("[data-lb-open]", this.el);
         open.href = face.src;
-        open.hidden = false;
+        open.hidden = !isTools;
       } else {
-        stage.innerHTML = `<div class="lb__empty">${escapeHtml(t("brochure.missing.title"))}</div>`;
+        stage.innerHTML = `<div class="lb__empty">${escapeHtml(
+          t(isTools ? "brochure.missing.title" : "brochure.pending.title")
+        )}</div>`;
         $("[data-lb-open]", this.el).hidden = true;
       }
       $(".lb__caption", this.el).textContent = `${state.index + 1}/${state.faces.length} · ${face.label}`;
@@ -380,6 +428,11 @@
   function renderQrSection() {
     const canvas = $("#qrCanvas");
     if (!canvas || typeof QRUtils === "undefined") return;
+    // người ngoài không thấy khối QR (trừ khi ui.showQrSection = true) → khỏi vẽ
+    if (canvas.closest("[hidden]")) return;
+    const card = canvas.closest(".qrCard");
+    const side = card && $(".qrCard__side", card);
+    if (card && side) card.classList.toggle("qrCard--solo", side.hidden);
     const input = $("#qrUrl");
     if (input && !qr.init) {
       input.value = currentQrUrl();
@@ -497,7 +550,10 @@
   function initReveal() {
     const items = $$(".reveal");
     if (!items.length) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || !("IntersectionObserver" in window)) {
       items.forEach((el) => el.classList.add("is-in"));
       return;
     }
@@ -547,6 +603,7 @@
   function boot() {
     lightbox.init();
     initQrControls();
+    applyVisibility();
     applyLanguage(lang);
     $$("[data-lang-btn]").forEach((btn) =>
       btn.addEventListener("click", () => applyLanguage(btn.getAttribute("data-lang-btn")))

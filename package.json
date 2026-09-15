@@ -1,17 +1,29 @@
 {
-  "name": "brochure-group4",
+  "name": "brochure-group1",
   "version": "1.0.0",
   "private": true,
-  "description": "Web nhỏ cho brochure 2 mặt song ngữ (VI/EN) của nhóm 4 — kèm mã QR quét là mở trang và thông tin thành viên.",
+  "description": "Web nhỏ cho brochure 2 mặt song ngữ (VI/EN) của nhóm 1 — kèm mã QR quét là mở trang và thông tin thành viên.",
   "type": "module",
   "scripts": {
     "start": "node tools/serve.mjs",
     "qr": "node tools/generate-qr.mjs",
     "check": "node tools/check.mjs"
   },
-  "keywords": ["brochure", "qr-code", "static-site", "bilingual"],
+  "keywords": [
+    "brochure",
+    "qr-code",
+    "static-site",
+    "bilingual"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "html-validate": "^11.15.0",
+    "jsdom": "^30.0.1",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.35.4"
   }
 }

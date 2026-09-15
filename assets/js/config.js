@@ -16,9 +16,28 @@ window.SITE_CONFIG = {
   url: "https://nhinguyen21604.github.io/Brochure/",
 
   /* ------------------------------------------------------------------
+   * 1b) CHẾ ĐỘ HIỂN THỊ — phần nào cho người ngoài xem, phần nào giấu đi
+   * ------------------------------------------------------------------
+   *  Mặc định web ở "chế độ công khai": người ngoài chỉ thấy
+   *  brochure + thành viên, KHÔNG thấy các công cụ nội bộ của nhóm
+   *  (ô nhập link QR, nút tải/ in QR, đường dẫn file ảnh, ghi chú deploy).
+   *
+   *  Cần dùng công cụ nội bộ? Mở link có thêm  ?tools=1
+   *      ví dụ: .../index.html?tools=1
+   *  (chỉ là mở lại bảng công cụ, không có dữ liệu riêng tư nào lộ ra)
+   * ------------------------------------------------------------------ */
+  ui: {
+    // true = cho người ngoài thấy luôn khối "Mã QR mở trang này" (chỉ hình QR,
+    // không kèm công cụ). Đặt false nếu không muốn hiện khối này.
+    showQrSection: false,
+    // Cho phép mở chế độ nội bộ bằng tham số ?tools=1 trên URL
+    allowToolsQuery: true,
+  },
+
+  /* ------------------------------------------------------------------
    * 2) THÔNG TIN CHUNG
    * ------------------------------------------------------------------ */
-  group: { vi: "Nhóm 4", en: "Group 4" },
+  group: { vi: "Nhóm 1", en: "Group 1" },
 
   title: {
     vi: "Brochure giới thiệu",
@@ -122,8 +141,8 @@ window.SITE_CONFIG = {
    * ------------------------------------------------------------------ */
   i18n: {
     vi: {
-      "meta.title": "Brochure nhóm 4 — bản tiếng Việt & tiếng Anh",
-      "brand.name": "Nhóm 4",
+      "meta.title": "Brochure nhóm 1 — bản tiếng Việt & tiếng Anh",
+      "brand.name": "Nhóm 1",
       "brand.sub": "Brochure song ngữ",
       "nav.brochure": "Brochure",
       "nav.team": "Thành viên",
@@ -132,7 +151,7 @@ window.SITE_CONFIG = {
       "hero.badge": "Brochure 2 mặt · Song ngữ",
       "hero.cta": "Xem brochure",
       "hero.cta2": "Lấy mã QR",
-      "hero.note": "Quét mã QR để mở đúng trang này trên điện thoại.",
+      "hero.note": "Dùng nút VI / EN ở góc trên để chuyển giữa bản tiếng Việt và bản tiếng Anh.",
       "info.course": "Môn học",
       "info.class": "Lớp",
       "info.lecturer": "Giảng viên",
@@ -144,13 +163,15 @@ window.SITE_CONFIG = {
       "brochure.zoom": "Xem lớn",
       "brochure.download": "Tải ảnh",
       "brochure.langTag": "Bản",
+      "brochure.pending.title": "Nội dung đang được cập nhật",
+      "brochure.pending.desc": "Hình ảnh brochure sẽ được nhóm bổ sung trong thời gian tới.",
       "brochure.missing.title": "Chưa có ảnh",
       "brochure.missing.desc": "Chèn ảnh vào thư mục sau rồi tải lại trang:",
       "brochure.viewerHint": "Kéo ngang để xem mặt còn lại",
 
       "team.eyebrow": "Nhóm thực hiện",
       "team.title": "Thành viên nhóm",
-      "team.desc": "Nhóm 4 thành viên cùng thực hiện nội dung, thiết kế và bản dịch brochure.",
+      "team.desc": "Nhóm gồm 4 thành viên, cùng thực hiện nội dung, thiết kế và bản dịch brochure.",
       "team.idLabel": "MSSV",
       "team.count": "4 thành viên",
 
@@ -168,8 +189,10 @@ window.SITE_CONFIG = {
       "qr.tip1": "Giữ khoảng trắng (vùng trắng) quanh mã khi in, mã cần tương phản tốt.",
       "qr.tip2": "Kích thước in gợi ý: tối thiểu 2 × 2 cm, tốt nhất 3 × 3 cm.",
       "qr.tip3": "Sau khi deploy, mở tools/README-qr.md để xuất lại mã QR với link mới.",
+      "qr.toolsNote": "Chế độ nội bộ (chỉ nhóm thấy) — mở bằng ?tools=1. Người ngoài không thấy khối này.",
+      "qr.toolsExit": "Xem như người ngoài",
 
-      "footer.madeBy": "Thực hiện bởi nhóm 4",
+      "footer.madeBy": "Thực hiện bởi Nhóm 1",
       "footer.note": "Trang web tĩnh — có thể đưa lên GitHub Pages, Netlify hoặc Vercel.",
       "footer.top": "Về đầu trang",
 
@@ -180,8 +203,8 @@ window.SITE_CONFIG = {
     },
 
     en: {
-      "meta.title": "Group 4 brochure — Vietnamese & English editions",
-      "brand.name": "Group 4",
+      "meta.title": "Group 1 brochure — Vietnamese & English editions",
+      "brand.name": "Group 1",
       "brand.sub": "Bilingual brochure",
       "nav.brochure": "Brochure",
       "nav.team": "Team",
@@ -190,7 +213,7 @@ window.SITE_CONFIG = {
       "hero.badge": "Two-sided · Bilingual brochure",
       "hero.cta": "View brochure",
       "hero.cta2": "Get the QR code",
-      "hero.note": "Scan the QR code to open this exact page on a phone.",
+      "hero.note": "Use the VI / EN switch at the top to change between the Vietnamese and English editions.",
       "info.course": "Course",
       "info.class": "Class",
       "info.lecturer": "Lecturer",
@@ -202,13 +225,15 @@ window.SITE_CONFIG = {
       "brochure.zoom": "Enlarge",
       "brochure.download": "Download image",
       "brochure.langTag": "Edition",
+      "brochure.pending.title": "Content coming soon",
+      "brochure.pending.desc": "The brochure images will be added very soon.",
       "brochure.missing.title": "Image not added yet",
       "brochure.missing.desc": "Drop the image into this folder, then reload the page:",
       "brochure.viewerHint": "Swipe to see the other side",
 
       "team.eyebrow": "The team",
       "team.title": "Team members",
-      "team.desc": "Four members working together on the content, the design and the translation.",
+      "team.desc": "A team of four members working together on the content, the design and the translation.",
       "team.idLabel": "Student ID",
       "team.count": "4 members",
 
@@ -226,8 +251,10 @@ window.SITE_CONFIG = {
       "qr.tip1": "Keep the white margin around the code and print it with strong contrast.",
       "qr.tip2": "Suggested print size: at least 2 × 2 cm, ideally 3 × 3 cm.",
       "qr.tip3": "After deploying, see tools/README-qr.md to export the QR code with your final link.",
+      "qr.toolsNote": "Internal mode (team only) — opened with ?tools=1. Visitors never see this panel.",
+      "qr.toolsExit": "View as visitor",
 
-      "footer.madeBy": "Made by Group 4",
+      "footer.madeBy": "Made by Group 1",
       "footer.note": "Static website — host it on GitHub Pages, Netlify or Vercel.",
       "footer.top": "Back to top",
 

@@ -1,6 +1,6 @@
 # Hướng dẫn chi tiết (tiếng Việt)
 
-Tài liệu này dành cho nhóm 4 — làm theo thứ tự là xong.
+Tài liệu này dành cho nhóm 1 — làm theo thứ tự là xong.
 
 ## Bước 0 — Xem web đang có gì
 
@@ -15,7 +15,7 @@ Nút **VI / EN** ở góc phải thanh trên cùng đổi ngôn ngữ cho phần
 
 Mở `assets/js/config.js`, sửa các mục:
 
-- `group`: tên nhóm (mặc định “Nhóm 4”).
+- `group`: tên nhóm (mặc định “Nhóm 1”).
 - `title`, `subtitle`: tiêu đề và mô tả ngắn.
 - `course`, `className`, `lecturer`, `period`: điền nếu muốn hiện ở khối đầu trang (để `""` nếu không cần).
 - `members`: tên + MSSV (đã điền sẵn 4 thành viên). Thêm `role` (vai trò) hoặc `link` (trang cá nhân) nếu muốn.
@@ -60,7 +60,7 @@ fileNames: {
    npm run qr                 # → assets/qr/qr-brochure.svg + .png
    ```
 
-   Trên web, bấm **Trang in QR** (mở `qr-print.html`) rồi in ở khổ A4.
+   Trên web, mở chế độ nội bộ `index.html?tools=1` → bấm **Trang in QR** (hoặc mở thẳng `qr-print.html`) rồi in ở khổ A4.
 4. Dán mã lên brochure (gợi ý 3 × 3 cm, xem `tools/README-qr.md`) và **quét thử bằng ít nhất 2 điện thoại**.
 
 ## Bước 4 — Kiểm tra cuối cùng
@@ -72,6 +72,17 @@ fileNames: {
 - [ ] Không còn chữ “chưa có ảnh” nào trên trang.
 - [ ] `npm run check` báo “Mọi thứ sẵn sàng!”.
 
+## Ai thấy gì trên trang?
+
+**Người ngoài (link thường)** chỉ thấy: phần giới thiệu, 2 mặt brochure, 4 thành viên.
+
+**Chỉ nhóm (link có `?tools=1`)** mới thấy: ô nhập link QR, nút tải PNG/SVG, nút sao chép link, trang in QR, mẹo in ấn, đường dẫn file ảnh cần thả vào, ghi chú deploy.
+
+Muốn người ngoài thấy thêm hình mã QR (không kèm công cụ): đặt `ui.showQrSection: true` trong `assets/js/config.js`.
+Muốn tắt hẳn `?tools=1`: đặt `ui.allowToolsQuery: false`.
+
+*Lưu ý:* cách này chỉ ẩn trên **trang web đã deploy**. Mã nguồn và thư mục `tools/`, `docs/` vẫn nằm trong repo GitHub — nếu cần giấu cả mã nguồn thì để repo ở chế độ **Private** hoặc deploy bằng Netlify/Vercel ở chế độ riêng tư.
+
 ## Câu hỏi thường gặp
 
 **Ảnh chụp bị mờ / nặng?**
@@ -82,6 +93,9 @@ Mở `assets/css/style.css`, sửa biến `--brand` và `--accent` ở khối `:
 
 **Mã QR quét không ra?**
 Xem `tools/README-qr.md` — thường là do in quá nhỏ, mất vùng trắng quanh mã, hoặc in mã nhạt.
+
+**Sao tôi mở link mà không thấy nút tải QR?**
+Đúng như thiết kế — công cụ chỉ hiện ở chế độ nội bộ: thêm `?tools=1` vào cuối link (ví dụ `.../index.html?tools=1`).
 
 **Có cần cài gì không?**
 Không. Web chạy bằng HTML/CSS/JS thuần, thư viện QR đã để sẵn trong `vendor/`. Các script trong `tools/` chỉ dùng module có sẵn của Node (không cần `npm install`).

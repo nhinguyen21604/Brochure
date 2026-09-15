@@ -418,6 +418,36 @@ button { font: inherit; }
   #qrCanvas { background: #fff; }
 }
 
+/* ------------------------------------------- Chế độ công khai / nội bộ */
+/* Quy tắc này đảm bảo [hidden] luôn thắng các display: flex/grid ở dưới */
+[hidden] { display: none !important; }
+
+/* Khối QR chỉ còn hình mã (khi bảng công cụ bị ẩn) → canh giữa, gọn hơn */
+.qrCard--solo { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+.qrCard--solo .qrCard__code { width: 100%; }
+
+.toolsNote {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem;
+  margin: 0 0 1rem; padding: .55rem .8rem; font-size: .8rem;
+  background: var(--accent-soft); color: color-mix(in srgb, var(--accent) 65%, var(--ink));
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: var(--radius-sm);
+}
+.toolsNote__exit { margin-left: auto; font-weight: 600; white-space: nowrap; }
+
+.toolsBadge {
+  position: fixed; left: 1rem; bottom: 1rem; z-index: 60;
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  max-width: min(92vw, 460px);
+  margin: 0; padding: .5rem .8rem; font-size: .78rem;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--muted); border: 1px solid var(--border); border-radius: 999px;
+  box-shadow: var(--shadow-md); backdrop-filter: blur(8px);
+}
+.toolsBadge a { font-weight: 600; }
+
+@media print { .toolsBadge { display: none !important; } }
+
 /* Người dùng tắt hiệu ứng chuyển động */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

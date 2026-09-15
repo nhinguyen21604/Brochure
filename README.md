@@ -1,4 +1,4 @@
-# Brochure nhóm 4 — web + mã QR
+# Brochure nhóm 1 — web + mã QR
 
 Web tĩnh nhỏ gọn để **quét mã QR là mở ngay**: xem 2 mặt brochure (bản **tiếng Việt** và bản **tiếng Anh**)
 và thông tin các thành viên trong nhóm.
@@ -11,6 +11,7 @@ và thông tin các thành viên trong nhóm.
 | Nguyễn Ngọc Thảo Nguyên | H2200107 |
 
 > **Khung sườn đã xong — bạn chỉ cần chèn ảnh brochure.** Xem mục [Chèn brochure](#2-chèn-brochure-vào-web-việc-duy-nhất-còn-lại).
+> Trang đã được tách **chế độ công khai** (mặc định — người ngoài chỉ thấy brochure + thành viên) và **chế độ nội bộ** (mở bằng `?tools=1` để thấy bảng công cụ QR).
 
 ---
 
@@ -82,15 +83,35 @@ Muốn đổi **tên nhóm, tiêu đề, môn học, vai trò thành viên, th�
 3. Chạy `npm run qr` để xuất lại mã QR theo link mới.
 4. In QR (xem `tools/README-qr.md`), dán lên brochure và **quét thử bằng điện thoại**.
 
-## 5. Tính năng đã có
+## 5. Công khai / nội bộ — phần nào ai thấy
+
+Trang mặc định ở **chế độ công khai**. Người ngoài chỉ thấy: phần giới thiệu, 2 mặt brochure, 4 thành viên.
+
+Các phần **chỉ nhóm thấy** (mở bằng `?tools=1`, ví dụ `.../index.html?tools=1`):
+
+| Phần | Vì sao giấu |
+| --- | --- |
+| Ô nhập link + nút Tải PNG/SVG/Sao chép + Trang in QR | công cụ tạo mã QR của nhóm |
+| Mẹo in ấn, mục "Mã QR" trên thanh điều hướng | nội dung nội bộ |
+| Khung báo thiếu ảnh kèm đường dẫn file (`assets/brochure/...`) | lộ cấu trúc thư mục; người ngoài chỉ thấy “Nội dung đang được cập nhật” |
+| Nút Tải ảnh / Mở ảnh gốc ở mỗi mặt brochure | công cụ làm việc |
+| Ghi chú deploy ở chân trang | ghi chú kỹ thuật |
+
+Muốn người ngoài thấy thêm hình mã QR (không kèm công cụ): đặt `ui.showQrSection: true` trong `assets/js/config.js`.
+Muốn tắt hẳn `?tools=1`: đặt `ui.allowToolsQuery: false`.
+
+> Lưu ý: ẩn trên **trang web** thôi — mã nguồn, `docs/`, `tools/` vẫn nằm trong repo GitHub nên ai xem repo vẫn thấy. Nếu cần giấu cả mã nguồn, để repo ở chế độ **Private** (GitHub Pages cần gói trả phí) hoặc deploy bằng Netlify/Vercel ở chế độ riêng tư.
+
+## 6. Tính năng đã có
 
 - **Song ngữ VI/EN**: nút VI/EN trên thanh trên cùng; tự nhận ngôn ngữ trình duyệt, ghi nhớ lựa chọn, hỗ trợ `?lang=en`.
-- **Mã QR**: tự sinh theo link cấu hình, tải PNG/SVG, sao chép link, trang in riêng, xem trước link khác ngay trên web.
+- **Mã QR**: tự sinh theo link cấu hình; bảng công cụ (tải PNG/SVG, sao chép link, trang in riêng, xem trước link khác) nằm trong chế độ nội bộ `?tools=1`.
 - **Brochure**: 2 mặt cạnh nhau, bấm để xem lớn (lightbox: ← →, ESC, kéo/vuốt, phóng to), tải ảnh gốc; tự dò file ảnh nên chèn ảnh xong là chạy.
 - **Thành viên**: thẻ tên + MSSV (avatar chữ cái), hỗ trợ thêm vai trò và link cá nhân.
+- **Hai chế độ hiển thị**: công khai (mặc định) / nội bộ (`?tools=1`) — xem mục 5.
 - **Khác**: responsive tới 320 px, dark mode, tôn trọng `prefers-reduced-motion`, không phụ thuộc framework, không cần bước build.
 
-## 6. Bản quyền
+## 7. Bản quyền
 
 Mã nguồn của nhóm dùng tự do cho bài tập. `vendor/qrcode.js` là thư viện
 [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) của Kazuhiko Arase, giấy phép MIT.
