@@ -123,6 +123,11 @@
           </label>
           <p class="field__help" data-i18n="qr.urlHelp">Đổi link ở đây chỉ để xem trước; muốn lưu cố định thì sửa assets/js/config.js rồi chạy npm run qr.</p>
 
+          <p class="qrWarn" id="qrWarn" hidden>
+            <span data-i18n="qr.warnPreview">Đang xem trước một link khác — đừng in mã này lên brochure.</span>
+            <button type="button" class="btn btn--ghost btn--sm" id="qrReset" data-i18n="qr.reset">Về link chính thức</button>
+          </p>
+
           <p class="qrCard__link"><a id="qrLink" href="#" target="_blank" rel="noopener">—</a></p>
 
           <div class="btnRow">

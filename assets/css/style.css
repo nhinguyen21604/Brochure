@@ -331,6 +331,13 @@ html:not(.js) [data-qr-cta] { display: none !important; }
   border-radius: var(--radius-sm);
 }
 .toolsNote__exit { margin-left: auto; font-weight: 600; white-space: nowrap; }
+.qrWarn {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem;
+  margin: 0 0 .8rem; padding: .5rem .75rem; font-size: .78rem;
+  background: var(--accent-soft); color: color-mix(in srgb, var(--accent) 68%, var(--ink));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: var(--radius-sm);
+}
 .fixedQr {
   margin: 0 0 .9rem; padding: .5rem .75rem; font-size: .78rem;
   background: var(--brand-soft); color: var(--brand-strong);

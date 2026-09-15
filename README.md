@@ -72,9 +72,13 @@ Nếu bạn dùng link khác (domain riêng, Netlify, Vercel…): sửa `SITE_CO
 | `assets/qr/qr-brochure.svg` | **In brochure** — vector, phóng to bao nhiêu cũng nét |
 | `assets/qr/qr-brochure.png` | 740 × 740 px — dán vào Word/slide, đăng mạng xã hội |
 | `qr-print.html` | Mở trên web (nút *Trang in QR*) → có sẵn khung in A4 |
+| `assets/img/og-cover.png` | Ảnh xem trước khi chia sẻ link lên Facebook/Zalo — **có sẵn mã QR thật trong ảnh** |
 
-Cả hai file đều được kiểm chứng: **giải mã lại ra đúng link** `https://nhinguyen21604.github.io/Brochure/`.
+Cả 3 file QR đều được kiểm chứng: **giải mã lại ra đúng link** `https://nhinguyen21604.github.io/Brochure/`.
 Chi tiết cách in & kiểm tra: `tools/README-qr.md`.
+
+> `npm run check` cũng kiểm tra việc này: nếu bạn đổi link trong `config.js` mà chưa chạy lại `npm run qr`,
+> nó sẽ báo **mã QR lệch link** (và thoát với mã lỗi 1) để bạn không in nhầm mã dẫn sai chỗ.
 
 ## 5. Cấu trúc dự án
 

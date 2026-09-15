@@ -300,6 +300,7 @@
   /* --------------------------------------------------------- Lightbox */
   const lightbox = {
     el: null,
+    lastFocus: null,
     init() {
       this.el = $("#lightbox");
       if (!this.el) return;
@@ -309,14 +310,17 @@
       });
       $("[data-lb-prev]", this.el).addEventListener("click", () => this.step(-1));
       $("[data-lb-next]", this.el).addEventListener("click", () => this.step(1));
-      $("[data-lb-zoom]", this.el).addEventListener("click", () => {
-        $(".lb__stage", this.el).classList.toggle("is-zoomed");
+      $("[data-lb-zoom]", this.el).addEventListener("click", () => this.toggleZoom());
+      // bấm/gõ vào ảnh đang xem cũng thu nhỏ lại — thao tác quen thuộc của người dùng
+      $(".lb__stage", this.el).addEventListener("click", (e) => {
+        if (e.target.tagName === "IMG") this.toggleZoom();
       });
       document.addEventListener("keydown", (e) => {
         if (this.el.hidden) return;
         if (e.key === "Escape") close();
         if (e.key === "ArrowLeft") this.step(-1);
         if (e.key === "ArrowRight") this.step(1);
+        if (e.key === "Tab") this.trapFocus(e);
       });
       // vuốt ngang trên điện thoại
       let x0 = null;
@@ -335,20 +339,51 @@
     },
     open(index) {
       state.index = index;
+      this.lastFocus = document.activeElement;
       this.el.hidden = false;
       document.body.classList.add("no-scroll");
       this.paint();
+      // đưa tiêu điểm vào hộp thoại để bàn phím/trình đọc màn hình dùng được ngay
+      const target = $("[data-close]", this.el);
+      if (target) target.focus();
     },
     close() {
       this.el.hidden = true;
       document.body.classList.remove("no-scroll");
       $(".lb__stage", this.el).classList.remove("is-zoomed");
+      if (this.lastFocus && this.lastFocus.isConnected && typeof this.lastFocus.focus === "function") {
+        this.lastFocus.focus();
+      }
+      this.lastFocus = null;
+    },
+    /** Bật/tắt phóng to; luôn vẽ lại ảnh để con trỏ chuột đúng trạng thái. */
+    toggleZoom() {
+      const stage = $(".lb__stage", this.el);
+      const zoomed = stage.classList.toggle("is-zoomed");
+      const img = $("img", stage);
+      if (img) img.style.cursor = zoomed ? "zoom-out" : "zoom-in";
+    },
+    /** Giữ phím Tab trong hộp thoại, không cho chạy ra sau lưng. */
+    trapFocus(e) {
+      const focusables = $$(".lb__btn:not([hidden])", this.el).filter((el) => el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !this.el.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !this.el.contains(active))) {
+        e.preventDefault();
+        first.focus();
+      }
     },
     step(dir) {
       const n = state.faces.length;
       if (!n) return;
       state.index = (state.index + dir + n) % n;
-      $(".lb__stage", this.el).classList.remove("is-zoomed");
+      const stage = $(".lb__stage", this.el);
+      stage.classList.remove("is-zoomed");
       this.paint();
     },
     paint() {
@@ -425,10 +460,12 @@
   /* --------------------------------------------------------------- QR */
   const qr = { url: "", init: false };
 
+  /* Link dùng để vẽ mã QR: ưu tiên ?u= (xem trước), còn lại LUÔN lấy link
+     chính thức trong config. Không dùng lại link xem trước của lần trước —
+     để nhóm không vô tình in ra mã QR dẫn sai chỗ. */
   function currentQrUrl() {
     const fromQuery = new URLSearchParams(location.search).get("u");
-    const saved = localStorage.getItem(URL_KEY);
-    return fromQuery || saved || CFG.url || location.href.split("?")[0];
+    return fromQuery || CFG.url || location.href.split("?")[0];
   }
 
   function renderQrSection() {
@@ -444,12 +481,17 @@
       input.value = currentQrUrl();
       input.addEventListener("input", () => {
         const value = input.value.trim();
-        if (value) {
-          localStorage.setItem(URL_KEY, value);
-          drawQr(value);
-        }
+        if (value) drawQr(value);   // chỉ xem trước tại chỗ, không lưu lại
       });
       qr.init = true;
+    }
+    const reset = $("#qrReset");
+    if (reset) {
+      reset.addEventListener("click", () => {
+        try { localStorage.removeItem(URL_KEY); } catch (err) { /* bỏ qua */ }
+        if (input) input.value = CFG.url || "";
+        drawQr(input ? input.value.trim() : CFG.url);
+      });
     }
     drawQr((input && input.value.trim()) || currentQrUrl());
   }
@@ -483,9 +525,15 @@
       link.textContent = text;
       link.href = text;
     }
+    // Trang in: chỉ truyền ?u= khi link khác link chính thức, để lúc in dùng
+    // đúng file QR cố định trong assets/qr (nét hơn hẳn bản vẽ bằng canvas).
+    const isOfficial = text === CFG.url;
     $$("[data-qr-print]").forEach((a) => {
-      a.href = `qr-print.html?u=${encodeURIComponent(text)}`;
+      a.href = isOfficial ? "qr-print.html" : `qr-print.html?u=${encodeURIComponent(text)}`;
     });
+    // Cảnh báo để không in nhầm mã QR của link xem trước
+    const warn = $("#qrWarn");
+    if (warn) warn.hidden = isOfficial;
   }
 
   function initQrControls() {
@@ -535,7 +583,10 @@
         }, 1600);
       });
 
-    window.addEventListener("resize", debounce(() => drawQr(qr.url), 200));
+    // chỉ vẽ lại khi đã có nội dung mã (chế độ công khai không có khối QR)
+    window.addEventListener("resize", debounce(() => {
+      if (qr.url) drawQr(qr.url);
+    }, 200));
   }
 
   /* ------------------------------------------------------------ Tiện ích */

@@ -31,15 +31,24 @@ Tuỳ chọn: `--url --out --name --scale --margin --dark --light --ecc`
 ## 3. Kiểm tra trước khi nộp
 
 ```bash
-node tools/check.mjs      # xem link QR, ảnh brochure còn thiếu, thông tin thành viên
+node tools/check.mjs      # link QR, mã QR có lệch link không, ảnh brochure còn thiếu, thông tin nhóm
+npm run live              # link đã thật sự mở được chưa (cần internet, chạy ở máy bạn)
 ```
+
+`check.mjs` thoát với mã lỗi **1** nếu còn mục ✖ — tiện để cắm vào công cụ tự động hoá.
 
 1. Mở `qr-print.html`, in ra giấy nháp rồi quét thử bằng 2–3 điện thoại khác nhau.
 2. Thử quét trong điều kiện thật: ánh sáng lớp học, mã hơi cong, khoảng cách 15–30 cm.
 3. Quét xong phải mở đúng trang web (không bị chuyển hướng), và trên điện thoại phải xem được cả 2 mặt brochure.
 4. Nhớ dùng link **https** — nếu trang chưa có HTTPS, một số máy sẽ cảnh báo.
 
-## 4. Ghi chú kỹ thuật
+## 4. Ảnh xem trước khi chia sẻ link
+
+`assets/img/og-cover.png` (1200 × 630) là ảnh hiện ra khi dán link lên Facebook/Zalo/Messenger.
+Trong ảnh **đã nhúng sẵn mã QR thật** trỏ về đúng trang — người xem thấy ảnh là quét được luôn.
+Nếu bạn đổi link, nhớ tạo lại ảnh này (hoặc chỉ cần đổi `assets/img/og-cover.png` bằng ảnh khác).
+
+## 5. Ghi chú kỹ thuật
 
 - Mã QR dùng thư viện `vendor/qrcode.js` ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), giấy phép MIT), chạy hoàn toàn phía trình duyệt — không cần internet, không gửi dữ liệu đi đâu.
 - `tools/generate-qr.mjs` cũng dùng cùng thư viện đó trong Node, kèm bộ mã hoá PNG viết tay nên **không cần `npm install`**.

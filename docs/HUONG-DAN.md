@@ -80,6 +80,7 @@ fileNames: {
 - [ ] 4 thành viên hiện đủ tên + MSSV, đúng chính tả (nhớ dấu tiếng Việt).
 - [ ] Quét mã QR từ **bản in giấy** → mở đúng trang (thử 2 điện thoại, 2 app camera khác nhau).
 - [ ] `npm run live` báo HTTP 200 — link QR thật sự mở được.
+- [ ] `npm run check` không còn mục ✖ nào (báo cả trường hợp mã QR lệch link).
 - [ ] Không còn chữ “chưa có ảnh” nào trên trang.
 - [ ] `npm run check` báo “Mọi thứ sẵn sàng!”.
 
@@ -107,6 +108,10 @@ Xem `tools/README-qr.md` — thường là do in quá nhỏ, mất vùng trắng
 
 **Vì sao mã QR quét không mở được?**
 Kiểm tra theo thứ tự: (0) repo còn ở chế độ **Private** thì GitHub Pages không chạy trên gói miễn phí — đổi sang Public hoặc dùng GitHub Pro / Netlify – Vercel; (1) `npm run live` xem link đã lên mạng chưa — nếu chưa thì bật GitHub Pages; (2) link trong `assets/js/config.js` có khớp link thật không, nếu khác thì chạy lại `npm run qr`; (3) mã in có bị nhỏ quá (< 2 cm) hoặc mất vùng trắng quanh mã không.
+
+**Nhập link xem trước trong ô QR rồi lỡ tay in?**
+Trang chỉ hiện cảnh báo "Đang xem trước một link khác — đừng in mã này", và link xem trước **không được lưu lại** —
+mở lại trang là tự về link chính thức. Bấm **Về link chính thức** để quay lại ngay.
 
 **Sao tôi mở link mà không thấy nút tải QR?**
 Đúng như thiết kế — công cụ chỉ hiện ở chế độ nội bộ: thêm `?tools=1` vào cuối link (ví dụ `.../index.html?tools=1`).

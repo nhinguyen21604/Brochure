@@ -81,14 +81,18 @@
       }
       var input = document.getElementById("url");
       var canvas = document.getElementById("qr");
+      var fixedImg = document.getElementById("qrFixed");
       var linkText = document.getElementById("linkText");
-      var scale = 10;
+      var custom = params.get("u");      // link xem trước (nếu có)
+      var usingFixed = false;            // đang hiển thị file QR cố định?
 
+      /* Vẽ mã QR vào canvas (dùng làm phương án dự phòng + cho nút Tải PNG
+         khi bạn đang xem trước một link khác). */
       function render(value) {
         if (!value) return;
         try {
           var count = QRUtils.matrix(value).count;
-          scale = Math.max(4, Math.floor(360 / (count + 8)));
+          var scale = Math.max(4, Math.floor(360 / (count + 8)));
           QRUtils.toCanvas(canvas, value, { scale: scale, margin: 4, dark: "#0f172a", light: "#ffffff" });
         } catch (err) {
           linkText.textContent = "⚠ " + err.message;
@@ -98,46 +102,60 @@
         document.title = "Mã QR — " + value;
       }
 
-      input.value = url;
-
-      /* Mặc định in đúng file QR cố định trong assets/qr (đã xuất bằng npm run qr).
-         Chỉ vẽ lại bằng canvas khi bạn nhập link khác để xem trước. */
-      var fixedImg = document.getElementById("qrFixed");
-      var custom = params.get("u");
-      function useFixed() {
-        if (custom) return false;
-        return !!(cfg.url && url === cfg.url);
-      }
+      /* Mặc định in đúng file QR cố định trong assets/qr (đã xuất bằng npm run qr)
+         để nét nhất. Chỉ vẽ bằng canvas khi bạn xem trước link khác. */
       function showFixed() {
-        canvas.hidden = true;
+        if (usingFixed) return;
+        usingFixed = true;
+        render(url);            // vẫn vẽ canvas để nút Tải PNG luôn có nội dung
+        linkText.textContent = url;
         fixedImg.hidden = false;
+        canvas.hidden = true;
       }
-      fixedImg.addEventListener("error", function () {   // chưa có file → vẽ bằng canvas
-        fixedImg.hidden = true; canvas.hidden = false; render(url);
-      });
-      if (useFixed()) {
-        showFixed();
-      } else {
+      function showCanvas(value) {
+        usingFixed = false;
+        fixedImg.hidden = true;
         canvas.hidden = false;
-        render(url);
+        render(value);
       }
-      input.addEventListener("input", function () {
-        custom = input.value.trim() === cfg.url ? null : "1";
-        if (useFixed()) { showFixed(); }
-        else { fixedImg.hidden = true; canvas.hidden = false; render(input.value.trim()); }
+      function wantsFixed(value) {
+        return !custom && !!cfg.url && value === cfg.url;
+      }
+
+      fixedImg.addEventListener("error", function () {
+        // chưa có file QR cố định → quay về vẽ bằng canvas
+        if (usingFixed) showCanvas(url);
       });
+
+      input.value = url;
+      if (wantsFixed(url)) showFixed(); else showCanvas(url);
 
       input.addEventListener("input", function () {
         var value = input.value.trim();
-        if (value) render(value);
+        custom = value === cfg.url ? null : "1";
+        if (!value) return;                       // gõ dở thì giữ nguyên mã đang có
+        if (wantsFixed(value)) showFixed(); else showCanvas(value);
       });
+
       document.getElementById("print").addEventListener("click", function () { window.print(); });
       document.getElementById("png").addEventListener("click", function () {
+        if (usingFixed) {
+          // tải đúng file QR cố định — bản in nét nhất
+          var a = document.createElement("a");
+          a.href = fixedImg.getAttribute("src");
+          a.download = "qr-brochure.png";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          return;
+        }
         canvas.toBlob(function (blob) {
           var a = document.createElement("a");
           a.href = URL.createObjectURL(blob);
           a.download = "qr-brochure.png";
+          document.body.appendChild(a);
           a.click();
+          a.remove();
           setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
         }, "image/png");
       });

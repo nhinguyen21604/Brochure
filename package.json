@@ -19,12 +19,5 @@
   "license": "MIT",
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "html-validate": "^11.15.0",
-    "jsdom": "^30.0.1",
-    "jsqr": "^1.4.0",
-    "pngjs": "^7.0.0",
-    "sharp": "^0.35.4"
   }
 }

@@ -35,6 +35,7 @@ if (!cfg.url) {
   console.log("   → Sau khi deploy, đổi thành link thật rồi chạy: node tools/generate-qr.mjs");
 } else {
   console.log(ok(`Link: ${cfg.url}`));
+  console.log("   → Kiểm tra link đã thật sự mở được chưa: npm run live");
 }
 
 console.log("\n=== 2. Ảnh brochure ===");
@@ -60,14 +61,37 @@ for (const theme of themes) {
 }
 console.log(`   → ${found} ảnh đã có, ${missing} ảnh còn thiếu.`);
 
-console.log("\n=== 3. Thành viên nhóm ===");
+console.log("\n=== 3. Mã QR cố định (assets/qr) ===");
+{
+  const svgPath = path.join(ROOT, "assets", "qr", "qr-brochure.svg");
+  const pngPath = path.join(ROOT, "assets", "qr", "qr-brochure.png");
+  const hasPng = fs.existsSync(pngPath);
+  const hasSvg = fs.existsSync(svgPath);
+  if (hasPng) console.log(ok("qr-brochure.png — để dán vào Word/slide"));
+  else problems.push(bad("Thiếu assets/qr/qr-brochure.png — chạy: npm run qr"));
+  if (hasSvg) {
+    const svg = fs.readFileSync(svgPath, "utf8");
+    const inside = (svg.match(/<title>([^<]*)<\/title>/) || [])[1] || "";
+    if (inside === cfg.url) {
+      console.log(ok("qr-brochure.svg — để in, nội dung khớp link trong config.js"));
+    } else {
+      console.log(bad(`qr-brochure.svg chứa link CŨ: ${inside}`));
+      console.log(`   → Link hiện tại là: ${cfg.url}`);
+      problems.push(bad("Mã QR lệch link — chạy lại: npm run qr (nếu không, mã in ra sẽ dẫn sai chỗ)"));
+    }
+  } else {
+    problems.push(bad("Thiếu assets/qr/qr-brochure.svg — chạy: npm run qr"));
+  }
+}
+
+console.log("\n=== 4. Thành viên nhóm ===");
 const members = cfg.members || [];
 members.forEach((m, i) => console.log(ok(`${i + 1}. ${m.name} — ${m.id}`)));
 if (members.length !== 4) problems.push(warn(`Cấu hình đang có ${members.length} thành viên (nhóm cần 4).`));
 const dupes = members.map((m) => m.id).filter((id, i, a) => a.indexOf(id) !== i);
 if (dupes.length) problems.push(bad(`MSSV bị lặp: ${dupes.join(", ")}`));
 
-console.log("\n=== 4. Cấu trúc bắt buộc ===");
+console.log("\n=== 5. Cấu trúc bắt buộc ===");
 [
   "index.html",
   "qr-print.html",
@@ -75,6 +99,7 @@ console.log("\n=== 4. Cấu trúc bắt buộc ===");
   "assets/js/config.js",
   "assets/js/app.js",
   "assets/js/qr-utils.js",
+  "tools/live-check.mjs",
   "vendor/qrcode.js",
 ].forEach((rel) => {
   if (fs.existsSync(path.join(ROOT, rel))) {
@@ -88,7 +113,9 @@ console.log("\n=== 4. Cấu trúc bắt buộc ===");
 console.log("\n=== Kết luận ===");
 if (problems.length) {
   problems.forEach((p) => console.log(p));
+  console.log("\n→ Sửa các mục ✖ ở trên rồi chạy lại: npm run check\n");
 } else {
   console.log(ok("Mọi thứ sẵn sàng!"));
+  console.log("   Chưa có ảnh brochure thì thêm vào assets/brochure/{vi,en}/ rồi kiểm tra lại.\n");
 }
-console.log("");
+process.exit(problems.length ? 1 : 0);

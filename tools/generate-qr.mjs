@@ -176,15 +176,33 @@ fs.mkdirSync(outDir, { recursive: true });
 const svgFile = path.join(outDir, `${name}.svg`);
 const pngFile = path.join(outDir, `${name}.png`);
 fs.writeFileSync(svgFile, buildSvg(), "utf8");
-fs.writeFileSync(pngFile, buildPng());
+
+let pngBuffer = buildPng();
+let compressed = false;
+try {
+  // Nếu máy có sẵn sharp thì nén nhỏ hơn (chỉ là tuỳ chọn, không bắt buộc cài)
+  const { default: sharp } = await import("sharp");
+  pngBuffer = await sharp(pngBuffer)
+    .png({ compressionLevel: 9, palette: true, quality: 90, effort: 8 })
+    .toBuffer();
+  compressed = true;
+} catch (err) {
+  /* không có sharp → dùng bản PNG tự mã hoá ở trên, vẫn dùng tốt */
+}
+fs.writeFileSync(pngFile, pngBuffer);
 
 const px = (count + margin * 2) * scale;
 console.log(`✔ Nội dung mã QR : ${url}`);
 console.log(`✔ Số ô (modules): ${count} × ${count}  (+ viền ${margin} ô)`);
 console.log(`✔ ${path.relative(ROOT, svgFile)}  (vector — dùng khi in)`);
-console.log(`✔ ${path.relative(ROOT, pngFile)}  (${px} × ${px} px — dùng cho slide/mạng xã hội)`);
-if (/example\.com|localhost|127\.0\.0\.1|your-domain|\/$/.test(url) && !/^https:\/\/[^/]+\/[^/]*\/$/.test(url)) {
-  console.log("\n⚠ Link này trông chưa phải link thật. Sửa SITE_CONFIG.url trong assets/js/config.js rồi chạy lại lệnh này.");
+console.log(
+  `✔ ${path.relative(ROOT, pngFile)}  (${px} × ${px} px${compressed ? ", đã nén" : ""} — dùng cho slide/mạng xã hội, ${(
+    fs.statSync(pngFile).size / 1024
+  ).toFixed(0)} KB)`
+);
+if (/example\.com|localhost|127\.0\.0\.1|your-domain/.test(url)) {
+  console.log("\n⚠ Link này là link mẫu, chưa dùng được để in.");
+  console.log("   Sửa SITE_CONFIG.url trong assets/js/config.js rồi chạy lại: npm run qr");
 } else {
-  console.log("\n→ Nhớ kiểm tra link sống trước khi in: npm run live");
+  console.log("\n→ Kiểm tra link đã mở được chưa trước khi in: npm run live");
 }
