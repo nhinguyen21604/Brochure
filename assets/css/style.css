@@ -249,6 +249,7 @@ button { font: inherit; }
 .ph__alt { font-size: .78rem; margin: .5rem 0 0; opacity: .8; word-break: break-all; }
 
 .swipeHint { display: none; text-align: center; color: var(--muted); font-size: .84rem; margin-top: 1rem; }
+.noscriptHint { text-align: center; color: var(--muted); font-size: .88rem; margin-top: 1.2rem; }
 
 /* ------------------------------------------------------------ Members */
 .members { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
@@ -421,6 +422,12 @@ button { font: inherit; }
 /* ------------------------------------------- Chế độ công khai / nội bộ */
 /* Quy tắc này đảm bảo [hidden] luôn thắng các display: flex/grid ở dưới */
 [hidden] { display: none !important; }
+
+/* Nếu JavaScript không chạy (bị tắt, lỗi mạng, trình đọc tự động lấy nội dung),
+   mọi phần nội bộ vẫn phải kín. app.js sẽ chịu trách nhiệm hiện chúng khi có JS. */
+html:not(.js) [data-internal],
+html:not(.js) [data-qr-section],
+html:not(.js) [data-qr-cta] { display: none !important; }
 
 /* Khối QR chỉ còn hình mã (khi bảng công cụ bị ẩn) → canh giữa, gọn hơn */
 .qrCard--solo { grid-template-columns: 1fr; justify-items: center; text-align: center; }
