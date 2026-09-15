@@ -14,6 +14,20 @@
   const LANG_KEY = "brochure-lang";
   const URL_KEY = "brochure-qr-url";
 
+  /* Bọc localStorage: trình duyệt ở chế độ riêng tư hoặc mở bằng file:// có thể
+     chặn hẳn — lúc đó trang vẫn phải chạy bình thường. */
+  const store = {
+    get(key) {
+      try { return localStorage.getItem(key); } catch (err) { return null; }
+    },
+    set(key, value) {
+      try { localStorage.setItem(key, value); return true; } catch (err) { return false; }
+    },
+    remove(key) {
+      try { localStorage.removeItem(key); } catch (err) { /* bỏ qua */ }
+    },
+  };
+
   /* ------------------------------------------------- Chế độ công khai / nội bộ
    * Người ngoài chỉ thấy brochure + thành viên. Các phần đánh dấu
    * [data-internal] (bảng công cụ QR, ghi chú kỹ thuật, đường dẫn file ảnh)
@@ -34,9 +48,6 @@
 
     const qrSection = $("[data-qr-section]");
     if (qrSection) qrSection.hidden = !showQrSection;
-    $$("[data-qr-cta]").forEach((el) => {
-      el.hidden = !showQrSection;
-    });
 
     // khi bảng công cụ bị ẩn, khối QR chỉ còn hình mã → canh giữa cho gọn
     const card = $(".qrCard");
@@ -53,7 +64,7 @@
   function detectLang() {
     const q = new URLSearchParams(location.search).get("lang");
     if (q && DICTS[q]) return q;
-    const saved = localStorage.getItem(LANG_KEY);
+    const saved = store.get(LANG_KEY);
     if (saved && DICTS[saved]) return saved;
     const nav = (navigator.language || "vi").slice(0, 2);
     return DICTS[nav] ? nav : "vi";
@@ -74,7 +85,7 @@
 
   function applyLanguage(next) {
     lang = DICTS[next] ? next : "vi";
-    localStorage.setItem(LANG_KEY, lang);
+    store.set(LANG_KEY, lang);
     document.documentElement.lang = lang;
     document.title = t("meta.title");
 
@@ -101,6 +112,8 @@
     renderFooter();
     renderBrochure();
     renderQrSection();
+    // đang mở ảnh xem lớn mà đổi ngôn ngữ → cập nhật luôn nhãn trong hộp thoại
+    if (lightbox.el && !lightbox.el.hidden) lightbox.paint();
   }
 
   /* ------------------------------------------------- Phần đầu & chân trang */
@@ -139,7 +152,8 @@
   }
 
   /* ------------------------------------------------------- Dò file ảnh */
-  const resolved = {}; // cache: "vi:front" -> đường dẫn ảnh tìm được
+  const resolved = {};   // cache: "vi:front" -> đường dẫn ảnh tìm được
+  const probing = {};    // "vi:front" -> đang dò (tránh dò trùng khi đổi ngôn ngữ liên tục)
 
   function imageCandidates(langKey, faceKey) {
     const b = CFG.brochure || {};
@@ -208,17 +222,31 @@
       card.append(label, frame, actions);
       host.appendChild(card);
 
-      // đã có sẵn trong cache?
-      const cached = resolved[`${lang}:${face.key}`];
-      if (cached) return paint(card, face, cached);
+      const cacheKey = `${lang}:${face.key}`;
+
+      // đã biết kết quả trước đó?
+      if (resolved[cacheKey]) return paint(card, face, resolved[cacheKey]);
+      if (resolved[cacheKey] === null) return paintMissing(card, face);
+
+      // đang dò rồi thì chờ kết quả đó, không tạo thêm một loạt yêu cầu nữa
+      if (probing[cacheKey]) {
+        probing[cacheKey].push({ card, face });
+        return;
+      }
+      probing[cacheKey] = [{ card, face }];
 
       resolveImage(
         face.candidates,
         (src) => {
-          resolved[`${lang}:${face.key}`] = src;
-          paint(card, face, src);
+          resolved[cacheKey] = src;
+          probing[cacheKey].forEach(({ card: c, face: f }) => paint(c, f, src));
+          delete probing[cacheKey];
         },
-        () => paintMissing(card, face)
+        () => {
+          resolved[cacheKey] = null;   // nhớ là không có ảnh → lần sau khỏi dò lại
+          probing[cacheKey].forEach(({ card: c, face: f }) => paintMissing(c, f));
+          delete probing[cacheKey];
+        }
       );
     });
   }
@@ -356,16 +384,15 @@
       }
       this.lastFocus = null;
     },
-    /** Bật/tắt phóng to; luôn vẽ lại ảnh để con trỏ chuột đúng trạng thái. */
+    /** Bật/tắt phóng to (con trỏ chuột đổi theo class .is-zoomed trong CSS). */
     toggleZoom() {
-      const stage = $(".lb__stage", this.el);
-      const zoomed = stage.classList.toggle("is-zoomed");
-      const img = $("img", stage);
-      if (img) img.style.cursor = zoomed ? "zoom-out" : "zoom-in";
+      $(".lb__stage", this.el).classList.toggle("is-zoomed");
     },
-    /** Giữ phím Tab trong hộp thoại, không cho chạy ra sau lưng. */
+    /** Giữ phím Tab trong hộp thoại, không cho chạy ra sau lưng.
+     *  Lưu ý: KHÔNG lọc bằng offsetParent — các nút này nằm trong khối
+     *  position: fixed nên offsetParent luôn là null và sẽ bị lọc sạch. */
     trapFocus(e) {
-      const focusables = $$(".lb__btn:not([hidden])", this.el).filter((el) => el.offsetParent !== null);
+      const focusables = $$(".lb__btn", this.el).filter((el) => !el.hidden);
       if (!focusables.length) return;
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
@@ -488,7 +515,7 @@
     const reset = $("#qrReset");
     if (reset) {
       reset.addEventListener("click", () => {
-        try { localStorage.removeItem(URL_KEY); } catch (err) { /* bỏ qua */ }
+        store.remove(URL_KEY);
         if (input) input.value = CFG.url || "";
         drawQr(input ? input.value.trim() : CFG.url);
       });
@@ -638,9 +665,12 @@
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-          links.forEach((a) =>
-            a.classList.toggle("is-current", a.getAttribute("href") === "#" + entry.target.id)
-          );
+          links.forEach((a) => {
+            const on = a.getAttribute("href") === "#" + entry.target.id;
+            a.classList.toggle("is-current", on);
+            if (on) a.setAttribute("aria-current", "true");
+            else a.removeAttribute("aria-current");
+          });
         });
       },
       { rootMargin: "-45% 0px -50% 0px" }

@@ -139,7 +139,28 @@ function hexToRgb(hex) {
 }
 
 function buildPng() {
-  const px = (count + margin * 2) * scale;
+  /* Ghi kèm file mô tả để các công cụ khác (check.mjs, live-check.mjs) biết
+   mã QR này được tạo từ link nào, lúc nào — tránh in nhầm mã cũ. */
+const metaFile = path.join(outDir, `${name}.json`);
+fs.writeFileSync(
+  metaFile,
+  JSON.stringify(
+    {
+      url,
+      modules: count,
+      scale,
+      margin,
+      errorCorrection: ecc,
+      generatedAt: new Date().toISOString(),
+      files: { svg: `${name}.svg`, png: `${name}.png` },
+    },
+    null,
+    2
+  ) + "\n",
+  "utf8"
+);
+
+const px = (count + margin * 2) * scale;
   const [dr, dg, db] = hexToRgb(dark);
   const [lr, lg, lb] = hexToRgb(light);
   const stride = px * 3 + 1;
@@ -191,15 +212,39 @@ try {
 }
 fs.writeFileSync(pngFile, pngBuffer);
 
+/* Ghi kèm file mô tả để các công cụ khác (check.mjs, live-check.mjs) biết
+   mã QR này được tạo từ link nào, lúc nào — tránh in nhầm mã cũ. */
+const metaFile = path.join(outDir, `${name}.json`);
+fs.writeFileSync(
+  metaFile,
+  JSON.stringify(
+    {
+      url,
+      modules: count,
+      scale,
+      margin,
+      errorCorrection: ecc,
+      generatedAt: new Date().toISOString(),
+      files: { svg: `${name}.svg`, png: `${name}.png` },
+    },
+    null,
+    2
+  ) + "\n",
+  "utf8"
+);
+
 const px = (count + margin * 2) * scale;
 console.log(`✔ Nội dung mã QR : ${url}`);
 console.log(`✔ Số ô (modules): ${count} × ${count}  (+ viền ${margin} ô)`);
+console.log(`✔ ${path.relative(ROOT, metaFile)}  (mô tả: link + thời điểm tạo)`);
 console.log(`✔ ${path.relative(ROOT, svgFile)}  (vector — dùng khi in)`);
 console.log(
-  `✔ ${path.relative(ROOT, pngFile)}  (${px} × ${px} px${compressed ? ", đã nén" : ""} — dùng cho slide/mạng xã hội, ${(
-    fs.statSync(pngFile).size / 1024
-  ).toFixed(0)} KB)`
+  `✔ ${path.relative(ROOT, pngFile)}  (${px} × ${px} px${compressed ? ", đã nén" : ""} — dùng cho slide/mạng xã hội)`
 );
+const pngSizeKB = (fs.statSync(pngFile).size / 1024).toFixed(0);
+const svgSizeKB = (fs.statSync(svgFile).size / 1024).toFixed(0);
+console.log(`   (dung lượng: svg ${svgSizeKB} KB · png ${pngSizeKB} KB)`);
+
 if (/example\.com|localhost|127\.0\.0\.1|your-domain/.test(url)) {
   console.log("\n⚠ Link này là link mẫu, chưa dùng được để in.");
   console.log("   Sửa SITE_CONFIG.url trong assets/js/config.js rồi chạy lại: npm run qr");

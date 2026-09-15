@@ -23,6 +23,10 @@ npm start            # mở http://localhost:4173
 
 Khi chưa có ảnh, mỗi mặt brochure hiện khung “Nội dung đang được cập nhật” — **không lỗi, không vỡ giao diện**.
 
+Máy chủ xem thử này chỉ dùng ở máy bạn. Nó **không đọc được file nằm ngoài thư mục dự án**
+(link kiểu `../../` bị trả về 403), không cache (`no-store`) và chỉ nhận `GET`/`HEAD`.
+Trang thật trên GitHub Pages không bị ảnh hưởng gì.
+
 ## 2. Chèn brochure vào web (việc duy nhất còn lại)
 
 Xuất 4 file ảnh rồi đặt vào đúng thư mục:
@@ -37,6 +41,9 @@ assets/brochure/en/mat-sau.jpg       ← mặt sau,   bản tiếng Anh
 Ảnh chiếm gần trọn màn hình nên hãy xuất **dài cạnh 1600–2400 px**, JPG/PNG/WEBP đều được
 (web tự dò đuôi `.jpg .jpeg .png .webp .avif`; muốn đổi tên file thì sửa `brochure.fileNames` trong `assets/js/config.js`).
 Xong thì tải lại trang. `npm run check` cho biết còn thiếu ảnh nào.
+
+Ảnh điện thoại chụp/xuất ra thường nặng vài MB → chạy `npm run images` để xem báo cáo dung lượng,
+thêm `--write` để nén tại chỗ (bản gốc được giữ lại thành `.orig`, xem Bước 2 trong `docs/HUONG-DAN.md`).
 
 ## 3. Đưa lên mạng để mã QR quét được
 
@@ -73,6 +80,7 @@ Nếu bạn dùng link khác (domain riêng, Netlify, Vercel…): sửa `SITE_CO
 | `assets/qr/qr-brochure.png` | 740 × 740 px — dán vào Word/slide, đăng mạng xã hội |
 | `qr-print.html` | Mở trên web (nút *Trang in QR*) → có sẵn khung in A4 |
 | `assets/img/og-cover.png` | Ảnh xem trước khi chia sẻ link lên Facebook/Zalo — **có sẵn mã QR thật trong ảnh** |
+| `assets/qr/qr-brochure.json` | “Lý lịch” của mã QR: link, số ô, thời điểm tạo — để `npm run check` phát hiện mã bị lệch link |
 
 Cả 3 file QR đều được kiểm chứng: **giải mã lại ra đúng link** `https://nhinguyen21604.github.io/Brochure/`.
 Chi tiết cách in & kiểm tra: `tools/README-qr.md`.
@@ -97,7 +105,8 @@ Chi tiết cách in & kiểm tra: `tools/README-qr.md`.
 │   └── brochure/{vi,en}/       ⭐ Nơi bạn thả ảnh brochure vào
 ├── vendor/qrcode.js            Thư viện QR (MIT, chạy offline)
 ├── tools/
-│   ├── serve.mjs               Máy chủ tĩnh để xem thử (npm start)
+│   ├── serve.mjs               Máy chủ tĩnh để xem thử (npm start) — chặn truy cập ngoài thư mục
+│   ├── optimize-images.mjs     Báo cáo / nén ảnh brochure (npm run images)
 │   ├── generate-qr.mjs         Xuất mã QR ra SVG + PNG (npm run qr)
 │   ├── live-check.mjs          Kiểm tra link đã lên mạng chưa (npm run live)
 │   ├── check.mjs               Kiểm tra link / ảnh thiếu / thông tin nhóm (npm run check)

@@ -8,7 +8,7 @@
   /* Bảng màu */
   --ink: #0f172a;
   --body: #3b4759;
-  --muted: #6b7688;
+  --muted: #5f6a7d;        /* 5.10:1 trên nền — đạt WCAG AA */
   --bg: #f8f7f4;
   --surface: #ffffff;
   --surface-2: #f1efe9;
@@ -16,7 +16,8 @@
   --brand: #0e7c6b;
   --brand-strong: #0a5f52;
   --brand-soft: #e4f4f0;
-  --accent: #d98324;
+  --accent: #d98324;        /* dùng cho mảng màu/viền, KHÔNG dùng làm chữ trên nền sáng */
+  --accent-text: #a35c0a;   /* 4.79:1 trên nền — màu chữ cho các dòng nhấn */
   --accent-soft: #fdf1e0;
   --plum: #6d4bb8;
 
@@ -109,7 +110,7 @@ button { font: inherit; }
 .intro__inner { text-align: center; }
 .intro__group {
   margin: 0 0 .25rem; font-size: .78rem; font-weight: 700; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--accent);
+  text-transform: uppercase; color: var(--accent-text);
 }
 .intro__title { font-size: clamp(1.5rem, 3.6vw, 2.35rem); }
 .intro__sub { margin: .45rem auto 0; max-width: 62ch; color: var(--muted); font-size: .95rem; }
@@ -317,8 +318,7 @@ button { font: inherit; }
 /* Nếu JavaScript không chạy (bị tắt, lỗi mạng, trình đọc tự động lấy nội dung),
    mọi phần nội bộ vẫn phải kín. app.js sẽ chịu trách nhiệm hiện chúng khi có JS. */
 html:not(.js) [data-internal],
-html:not(.js) [data-qr-section],
-html:not(.js) [data-qr-cta] { display: none !important; }
+html:not(.js) [data-qr-section] { display: none !important; }
 
 .qrCard--solo { grid-template-columns: 1fr; justify-items: center; text-align: center; }
 .qrCard--solo .qrCard__code { width: 100%; }
@@ -384,10 +384,13 @@ html:not(.js) [data-qr-cta] { display: none !important; }
 /* ------------------------------------------------------------- Print */
 @media print {
   .topbar, .lb, .swipeHint, .btnRow, .face__hint, .footer__top, .toolsBadge, .showcase__hint { display: none !important; }
-  body { background: #fff; color: #000; }
-  .face, .qrCard, .member__inner { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .face, .qrCard, .member__inner { box-shadow: none; border-color: #bbb; break-inside: avoid; }
   .faces { display: block; }
   .face { margin-bottom: 1rem; }
+  .face__frame img { max-height: 92vh; }
+  .intro__group { color: #7a4405; }        /* giữ đủ tương phản khi in đen trắng */
+  a[href]::after { content: ""; }          /* không in URL sau mỗi liên kết */
 }
 
 /* --------------------------------------------------------- Dark mode */
@@ -404,6 +407,7 @@ html:not(.js) [data-qr-cta] { display: none !important; }
     --brand-strong: #6ee0c8;
     --brand-soft: #14322e;
     --accent: #f0b455;
+    --accent-text: #f0b455;   /* 10.13:1 trên nền tối */
     --accent-soft: #33260f;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 18px -12px rgba(0, 0, 0, .6);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, .45), 0 26px 50px -28px rgba(0, 0, 0, .8);

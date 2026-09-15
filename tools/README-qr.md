@@ -37,6 +37,10 @@ npm run live              # link đã thật sự mở được chưa (cần int
 
 `check.mjs` thoát với mã lỗi **1** nếu còn mục ✖ — tiện để cắm vào công cụ tự động hoá.
 
+Nó cũng đọc file “lý lịch” `assets/qr/qr-brochure.json` (link + số ô + thời điểm tạo) để so với
+`SITE_CONFIG.url`: khác nhau → báo **mã QR lệch link** ngay, tránh in ra mã dẫn sai chỗ.
+File này do `npm run qr` tự sinh, bạn không cần sửa tay.
+
 1. Mở `qr-print.html`, in ra giấy nháp rồi quét thử bằng 2–3 điện thoại khác nhau.
 2. Thử quét trong điều kiện thật: ánh sáng lớp học, mã hơi cong, khoảng cách 15–30 cm.
 3. Quét xong phải mở đúng trang web (không bị chuyển hướng), và trên điện thoại phải xem được cả 2 mặt brochure.
@@ -48,7 +52,17 @@ npm run live              # link đã thật sự mở được chưa (cần int
 Trong ảnh **đã nhúng sẵn mã QR thật** trỏ về đúng trang — người xem thấy ảnh là quét được luôn.
 Nếu bạn đổi link, nhớ tạo lại ảnh này (hoặc chỉ cần đổi `assets/img/og-cover.png` bằng ảnh khác).
 
-## 5. Ghi chú kỹ thuật
+## 5. Xem thử tại máy
+
+```bash
+npm start        # http://localhost:4173  (Ctrl+C để dừng)
+```
+
+Máy chủ xem thử chỉ phục vụ trong thư mục dự án: mọi đường dẫn kiểu `../` đều bị chặn (**403**),
+phương thức khác `GET`/`HEAD` bị trả **405**, và không cache để bạn sửa file là thấy ngay.
+Đây chỉ là chuyện của môi trường xem thử — không liên quan tới trang thật trên GitHub Pages.
+
+## 6. Ghi chú kỹ thuật
 
 - Mã QR dùng thư viện `vendor/qrcode.js` ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), giấy phép MIT), chạy hoàn toàn phía trình duyệt — không cần internet, không gửi dữ liệu đi đâu.
 - `tools/generate-qr.mjs` cũng dùng cùng thư viện đó trong Node, kèm bộ mã hoá PNG viết tay nên **không cần `npm install`**.

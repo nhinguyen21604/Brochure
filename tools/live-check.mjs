@@ -46,21 +46,90 @@ try {
 
 console.log(status === 200 ? ok(`HTTP ${status} — trang đã lên mạng`) : bad(`HTTP ${status} — trang chưa sẵn sàng`));
 
+const base = new URL(target);
+const configRes = await fetch(new URL("assets/js/config.js", base).href, { redirect: "follow" });
+const configText = configRes.ok ? await configRes.text() : "";
+
 const checks = [
-  ["có tiêu đề / tên nhóm", /Nhóm 1|Group 1/i.test(html)],
-  ["có khung brochure", /brochureFaces|assets\/brochure/i.test(html)],
-  ["có 4 MSSV", ["H2200161", "H2200004", "H2200106", "H2200107"].every((id) => html.includes(id))],
-  ["không lộ công cụ nội bộ ra HTML tĩnh", !/Chế độ nội bộ/.test(html.replace(/<script[\s\S]*?<\/script>/g, ""))],
+  ["trang có tiêu đề / tên nhóm", /Nhóm 1|Group 1/i.test(html)],
+  ["trang có khung brochure", /brochureFaces|assets\/brochure/i.test(html)],
+  ["config.js có đủ 4 MSSV", ["H2200161", "H2200004", "H2200106", "H2200107"].every((id) => configText.includes(id))],
+  ["config.js có tên 4 thành viên", ["Tô Thanh Mai", "Bùi Trần Trà My", "Nguyễn Ngọc Hoàng Nhi", "Nguyễn Ngọc Thảo Nguyên"].every((n) => configText.includes(n))],
 ];
+
+/* Phần nội bộ nằm trong HTML nhưng bị ẩn bằng CSS khi chưa có JS:
+   kiểm tra đúng luật đó trong style.css, thay vì tìm chuỗi trong HTML. */
+const cssRes = await fetch(new URL("assets/css/style.css", base).href, { redirect: "follow" });
+const cssText = cssRes.ok ? await cssRes.text() : "";
+checks.push([
+  "công cụ nội bộ bị ẩn khi chưa có JS (luật CSS còn nguyên)",
+  /html:not\(\.js\)[^{]*\[data-internal\]/.test(cssText) && /html:not\(\.js\)[^{]*\[data-qr-section\]/.test(cssText),
+]);
 checks.forEach(([label, pass]) => console.log(pass ? ok(label) : warn(`chưa thấy: ${label}`)));
+
+/* các tệp phải tải được từ internet, nếu không thì mã QR in ra cũng vô ích */
+async function headOk(url) {
+  try {
+    const res = await fetch(url, { method: "GET", redirect: "follow" });
+    return { status: res.status, type: res.headers.get("content-type") || "", size: (await res.arrayBuffer()).byteLength };
+  } catch (err) {
+    return { status: 0, type: "", size: 0 };
+  }
+}
+
+const assets = [
+  ["mã QR cố định (PNG)", new URL("assets/qr/qr-brochure.png", base).href, "image/"],
+  ["mã QR cố định (SVG)", new URL("assets/qr/qr-brochure.svg", base).href, "image/svg"],
+  ["trang in QR", new URL("qr-print.html", base).href, "text/html"],
+];
+for (const [label, url, wantType] of assets) {
+  const r = await headOk(url);
+  const good = r.status === 200 && r.type.includes(wantType);
+  console.log(good ? ok(`${label}: ${r.status} (${(r.size / 1024).toFixed(0)} KB)`) : bad(`${label}: HTTP ${r.status} — ${url}`));
+  if (!good) process.exitCode = 1;
+}
+
+/* ảnh xem trước khi chia sẻ link (og:image) — phải là link tuyệt đối và tải được */
+const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+if (!ogMatch) {
+  console.log(warn("Trang chưa khai báo og:image → dán link lên Facebook/Zalo sẽ không có ảnh xem trước"));
+} else {
+  const ogUrl = ogMatch[1];
+  let sameHost = false;
+  try { sameHost = new URL(ogUrl).host === base.host; } catch (err) { sameHost = false; }
+  if (!sameHost) {
+    console.log(warn(`og:image đang trỏ tới domain khác (link production): ${ogUrl}`));
+    console.log("   → Sau khi deploy lên đúng domain đó, chạy lại lệnh này để kiểm tra ảnh.");
+  } else {
+    const og = await headOk(ogUrl);
+    const okOg = og.status === 200 && og.type.includes("image");
+    console.log(okOg ? ok(`ảnh chia sẻ (og:image): ${og.status} (${(og.size / 1024).toFixed(0)} KB)`) : bad(`og:image lỗi: HTTP ${og.status} — ${ogUrl}`));
+    if (!okOg) process.exitCode = 1;
+  }
+}
 
 /* so khớp với mã QR đã xuất trong assets/qr */
 const pngPath = path.join(ROOT, "assets", "qr", "qr-brochure.png");
 if (fs.existsSync(pngPath)) {
-  console.log(ok(`Mã QR cố định có sẵn: assets/qr/qr-brochure.png + .svg`));
-  console.log(`   (nhớ chạy "npm run qr" nếu link ở trên khác SITE_CONFIG.url: ${cfg.url})`);
+  console.log(ok("Mã QR cố định có sẵn: assets/qr/qr-brochure.png + .svg"));
+  const metaPath = path.join(ROOT, "assets", "qr", "qr-brochure.json");
+  if (fs.existsSync(metaPath)) {
+    try {
+      const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+      console.log(
+        meta.url === cfg.url
+          ? ok(`Mã QR được tạo từ đúng link này (${meta.generatedAt.slice(0, 16).replace("T", " ")})`)
+          : bad(`Mã QR đang chứa link khác: ${meta.url} → chạy lại: npm run qr`)
+      );
+    } catch (err) {
+      console.log(warn("Không đọc được assets/qr/qr-brochure.json"));
+    }
+  } else {
+    console.log(warn("Chưa có assets/qr/qr-brochure.json — chạy: npm run qr"));
+  }
 } else {
   console.log(warn("Chưa có assets/qr/qr-brochure.png — chạy: npm run qr"));
 }
 
-console.log("\nMẹo: mở luôn link bằng điện thoại rồi thử quét mã in ra để chắc chắn.\n");
+console.log("\nMẹo: mở luôn link bằng điện thoại rồi thử quét mã in ra để chắc chắn.");
+console.log("     Mã QR phải chứa đúng link này:", cfg.url, "\n");

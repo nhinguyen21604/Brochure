@@ -63,13 +63,19 @@ console.log(`   → ${found} ảnh đã có, ${missing} ảnh còn thiếu.`);
 
 console.log("\n=== 3. Mã QR cố định (assets/qr) ===");
 {
-  const svgPath = path.join(ROOT, "assets", "qr", "qr-brochure.svg");
-  const pngPath = path.join(ROOT, "assets", "qr", "qr-brochure.png");
-  const hasPng = fs.existsSync(pngPath);
-  const hasSvg = fs.existsSync(svgPath);
-  if (hasPng) console.log(ok("qr-brochure.png — để dán vào Word/slide"));
-  else problems.push(bad("Thiếu assets/qr/qr-brochure.png — chạy: npm run qr"));
-  if (hasSvg) {
+  const qrDir = path.join(ROOT, "assets", "qr");
+  const svgPath = path.join(qrDir, "qr-brochure.svg");
+  const pngPath = path.join(qrDir, "qr-brochure.png");
+  const metaPath = path.join(qrDir, "qr-brochure.json");
+  const ageDays = (f) => (Date.now() - fs.statSync(f).mtimeMs) / 86400000;
+
+  if (fs.existsSync(pngPath)) {
+    console.log(ok(`qr-brochure.png — dán vào Word/slide (${(fs.statSync(pngPath).size / 1024).toFixed(0)} KB)`));
+  } else {
+    problems.push(bad("Thiếu assets/qr/qr-brochure.png — chạy: npm run qr"));
+  }
+
+  if (fs.existsSync(svgPath)) {
     const svg = fs.readFileSync(svgPath, "utf8");
     const inside = (svg.match(/<title>([^<]*)<\/title>/) || [])[1] || "";
     if (inside === cfg.url) {
@@ -81,6 +87,43 @@ console.log("\n=== 3. Mã QR cố định (assets/qr) ===");
     }
   } else {
     problems.push(bad("Thiếu assets/qr/qr-brochure.svg — chạy: npm run qr"));
+  }
+
+  // file mô tả: biết mã QR được tạo từ link nào, lúc nào
+  if (fs.existsSync(metaPath)) {
+    let meta = null;
+    try {
+      meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+    } catch (err) {
+      problems.push(bad("assets/qr/qr-brochure.json bị hỏng — chạy lại: npm run qr"));
+    }
+    if (meta) {
+      if (meta.url === cfg.url) {
+        console.log(ok(`qr-brochure.json — tạo lúc ${meta.generatedAt.slice(0, 16).replace("T", " ")}`));
+      } else {
+        console.log(bad(`qr-brochure.json ghi link khác: ${meta.url}`));
+        problems.push(bad("Mã QR lệch link — chạy lại: npm run qr"));
+      }
+    }
+  } else {
+    console.log(warn("Chưa có assets/qr/qr-brochure.json (bản QR cũ) — nên chạy lại: npm run qr"));
+  }
+
+  // link trong config mới sửa mà chưa xuất lại QR?
+  const configAge = ageDays(configFile);
+  if (fs.existsSync(svgPath) && configAge < ageDays(svgPath) - 0.001) {
+    console.log(warn("config.js mới được sửa SAU khi tạo mã QR — kiểm tra lại link rồi chạy: npm run qr"));
+  }
+
+  // ảnh chia sẻ mạng xã hội
+  const ogPath = path.join(ROOT, "assets", "img", "og-cover.png");
+  if (fs.existsSync(ogPath)) {
+    console.log(ok(`og-cover.png — ảnh xem trước khi chia sẻ link (${(fs.statSync(ogPath).size / 1024).toFixed(0)} KB)`));
+    if (configAge < ageDays(ogPath) - 0.001) {
+      console.log(warn("config.js mới được sửa sau khi làm ảnh og-cover.png — ảnh có thể còn mã QR cũ"));
+    }
+  } else {
+    console.log(warn("Chưa có assets/img/og-cover.png — link chia sẻ sẽ không có ảnh xem trước"));
   }
 }
 
@@ -100,6 +143,7 @@ console.log("\n=== 5. Cấu trúc bắt buộc ===");
   "assets/js/app.js",
   "assets/js/qr-utils.js",
   "tools/live-check.mjs",
+  "tools/optimize-images.mjs",
   "vendor/qrcode.js",
 ].forEach((rel) => {
   if (fs.existsSync(path.join(ROOT, rel))) {

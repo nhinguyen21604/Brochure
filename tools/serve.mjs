@@ -3,6 +3,8 @@
  *
  *   node tools/serve.mjs            → http://localhost:4173
  *   PORT=8080 node tools/serve.mjs  → đổi cổng
+ *
+ * Chỉ dùng cho việc xem thử ở máy, KHÔNG dùng để đưa lên internet.
  */
 import fs from "node:fs";
 import http from "node:http";
@@ -33,30 +35,64 @@ const MIME = {
   ".woff2": "font/woff2",
 };
 
+/** Chỉ cho phép file nằm trong thư mục dự án (chặn cả thư mục "anh em" cùng tiền tố). */
+function isInsideRoot(filePath) {
+  const rel = path.relative(ROOT, filePath);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
+function send(res, status, body, type = "text/html; charset=utf-8") {
+  res.writeHead(status, {
+    "content-type": type,
+    "cache-control": "no-store",
+    "x-content-type-options": "nosniff",
+  });
+  res.end(body);
+}
+
 const server = http.createServer((req, res) => {
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    return send(res, 405, "Chỉ hỗ trợ GET/HEAD", "text/plain; charset=utf-8");
+  }
+  let urlPath;
   try {
-    const urlPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-    let filePath = path.join(ROOT, urlPath);
-    if (!filePath.startsWith(ROOT)) {
-      res.writeHead(403).end("Forbidden");
-      return;
-    }
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-      filePath = path.join(filePath, "index.html");
-    }
-    if (!fs.existsSync(filePath)) {
-      res.writeHead(404, { "content-type": "text/html; charset=utf-8" });
-      res.end(`<h1>404</h1><p>Không tìm thấy <code>${urlPath}</code></p><p><a href="/">Về trang chủ</a></p>`);
-      return;
-    }
-    const body = fs.readFileSync(filePath);
-    res.writeHead(200, {
-      "content-type": MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream",
-      "cache-control": "no-store",
-    });
-    res.end(body);
+    urlPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
   } catch (err) {
-    res.writeHead(500, { "content-type": "text/plain; charset=utf-8" }).end(String(err));
+    return send(res, 400, "Đường dẫn không hợp lệ", "text/plain; charset=utf-8");
+  }
+
+  const filePath = path.join(ROOT, urlPath);
+
+  // Chặn mọi đường dẫn trỏ ra ngoài thư mục dự án:
+  // path.join + path.relative xử lý đúng cả "..", "%2e%2e" và thư mục cùng tiền tố tên.
+  if (!isInsideRoot(filePath)) {
+    console.warn(`⚠ Từ chối truy cập ngoài thư mục dự án: ${urlPath}`);
+    return send(res, 403, "Forbidden");
+  }
+
+  let target = filePath;
+  try {
+    if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
+      target = path.join(target, "index.html");
+    }
+    if (!fs.existsSync(target) || !fs.statSync(target).isFile()) {
+      return send(
+        res,
+        404,
+        `<h1>404</h1><p>Không tìm thấy <code>${urlPath.replace(/[<>&]/g, "")}</code></p><p><a href="/">Về trang chủ</a></p>`
+      );
+    }
+    const body = fs.readFileSync(target);
+    const type = MIME[path.extname(target).toLowerCase()] || "application/octet-stream";
+    res.writeHead(200, {
+      "content-type": type,
+      "content-length": body.length,
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
+    });
+    res.end(req.method === "HEAD" ? undefined : body);
+  } catch (err) {
+    send(res, 500, String(err), "text/plain; charset=utf-8");
   }
 });
 

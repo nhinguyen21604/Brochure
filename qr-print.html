@@ -45,10 +45,12 @@
     <p class="sub" id="subline">Scan the QR code to open our brochure</p>
 
     <div class="qrBox">
-      <img id="qrFixed" src="assets/qr/qr-brochure.png" alt="Mã QR dẫn tới trang brochure" hidden>
-      <canvas id="qr" width="360" height="360" role="img" aria-label="Mã QR dẫn tới trang brochure"></canvas>
+      <!-- Mặc định hiện đúng file QR cố định: không cần JavaScript vẫn in được.
+           Chỉ khi bạn xem trước ?u=<link khác> thì JS mới chuyển sang canvas. -->
+      <img id="qrFixed" src="assets/qr/qr-brochure.png" alt="Mã QR dẫn tới trang brochure">
+      <canvas id="qr" width="360" height="360" role="img" aria-label="Mã QR dẫn tới trang brochure" hidden></canvas>
     </div>
-    <p class="link" id="linkText">—</p>
+    <p class="link" id="linkText">https://nhinguyen21604.github.io/Brochure/</p>
 
     <div class="rows noPrint">
       <label for="url"><span>Link trong mã / Link:</span></label>
@@ -105,9 +107,7 @@
       /* Mặc định in đúng file QR cố định trong assets/qr (đã xuất bằng npm run qr)
          để nét nhất. Chỉ vẽ bằng canvas khi bạn xem trước link khác. */
       function showFixed() {
-        if (usingFixed) return;
         usingFixed = true;
-        render(url);            // vẫn vẽ canvas để nút Tải PNG luôn có nội dung
         linkText.textContent = url;
         fixedImg.hidden = false;
         canvas.hidden = true;
@@ -123,8 +123,12 @@
       }
 
       fixedImg.addEventListener("error", function () {
-        // chưa có file QR cố định → quay về vẽ bằng canvas
-        if (usingFixed) showCanvas(url);
+        // thiếu file assets/qr/qr-brochure.png → vẽ bằng canvas và nhắc nhở
+        showCanvas(url);
+        var hint = document.createElement("p");
+        hint.className = "tip";
+        hint.textContent = "Chưa có assets/qr/qr-brochure.png — đang vẽ tạm bằng canvas. Chạy: npm run qr";
+        document.querySelector(".card").appendChild(hint);
       });
 
       input.value = url;

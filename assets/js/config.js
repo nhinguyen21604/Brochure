@@ -158,6 +158,7 @@ window.SITE_CONFIG = {
       "footer.note": "Trang tĩnh — chạy npm start để xem tại máy, xem ?tools=1 để mở công cụ nội bộ.",
       "footer.top": "Về đầu trang",
 
+      "lightbox.title": "Xem brochure",
       "lightbox.close": "Đóng",
       "lightbox.prev": "Mặt trước",
       "lightbox.next": "Mặt sau",
@@ -213,6 +214,7 @@ window.SITE_CONFIG = {
       "footer.note": "Static site — run npm start to preview locally, open ?tools=1 for internal tools.",
       "footer.top": "Back to top",
 
+      "lightbox.title": "View brochure",
       "lightbox.close": "Close",
       "lightbox.prev": "Previous",
       "lightbox.next": "Next",

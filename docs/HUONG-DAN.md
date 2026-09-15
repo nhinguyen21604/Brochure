@@ -37,6 +37,17 @@ Mở `assets/js/config.js`, sửa các mục:
 
 3. Tải lại trang (Ctrl/Cmd + Shift + R). Chạy `npm run check` nếu muốn kiểm tra còn thiếu file nào.
 
+**Ảnh nặng quá?** Web tự dò đuôi file nên bạn không cần đổi code, nhưng ảnh > 1,5 MB sẽ tải chậm:
+
+```bash
+npm run images                 # chỉ xem báo cáo: kích thước, dung lượng, file nào cần nén
+npm i --no-save sharp          # một lần, để bật chế độ nén (không ghi vào package.json)
+npm run images -- --write      # nén tại chỗ; bản gốc giữ lại thành mat-truoc.jpg.orig
+```
+
+Báo cáo sẽ nhắc khi ảnh **nhỏ hơn 1200 px** (in ra sẽ mờ) hoặc **lớn hơn 2400 px / 1,5 MB**
+(chậm, tốn 4G). Hài lòng rồi thì xoá các file `.orig` để gọn repo.
+
 **Nếu muốn tên file khác:** sửa `brochure.fileNames` trong `config.js`, ví dụ:
 
 ```js
@@ -112,6 +123,13 @@ Kiểm tra theo thứ tự: (0) repo còn ở chế độ **Private** thì GitHu
 **Nhập link xem trước trong ô QR rồi lỡ tay in?**
 Trang chỉ hiện cảnh báo "Đang xem trước một link khác — đừng in mã này", và link xem trước **không được lưu lại** —
 mở lại trang là tự về link chính thức. Bấm **Về link chính thức** để quay lại ngay.
+
+**Tôi lỡ chạy `npm run images -- --write` mà muốn quay lại ảnh gốc?**
+Ảnh gốc vẫn còn nguyên bên cạnh, chỉ thêm đuôi `.orig` (ví dụ `mat-truoc.jpg.orig`) — đổi tên bỏ `.orig` là xong.
+
+**Sửa link QR mà quên tạo lại mã?**
+`npm run check` sẽ báo **“mã QR lệch link”** và thoát với mã lỗi 1. Chạy `npm run qr` để xuất lại
+`qr-brochure.svg`, `.png` và `.json`, rồi mới in.
 
 **Sao tôi mở link mà không thấy nút tải QR?**
 Đúng như thiết kế — công cụ chỉ hiện ở chế độ nội bộ: thêm `?tools=1` vào cuối link (ví dụ `.../index.html?tools=1`).
