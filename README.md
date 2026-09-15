@@ -40,7 +40,16 @@ Xong thì tải lại trang. `npm run check` cho biết còn thiếu ảnh nào.
 
 ## 3. Đưa lên mạng để mã QR quét được
 
-Chỉ cần làm **một lần**:
+> ⚠️ **Repo hiện đang ở chế độ Private.** GitHub Pages **không chạy được với repo private trên gói miễn phí** —
+> nên đây là việc đầu tiên cần xử lý, làm một trong hai cách:
+>
+> - **Cách A (đơn giản nhất):** đổi repo sang Public — **Settings → General → cuối trang (Danger zone) →
+>   Change repository visibility → Public**. Nội dung repo chỉ gồm trang brochure + tên và MSSV của 4 thành viên
+>   (những thông tin này vốn đã in trên brochure nộp cho giảng viên).
+> - **Cách B:** giữ repo private nếu tài khoản có **GitHub Pro** (bản Student Pack được miễn phí) — khi đó Pages
+>   chạy được với repo private; hoặc deploy bằng **Netlify/Vercel** (hai dịch vụ này cho phép deploy từ repo private).
+
+Sau đó chỉ cần làm **một lần**:
 
 1. **Merge PR** (nút *Merge pull request* trên GitHub) để nội dung vào nhánh `main`.
    *Muốn thử ngay không cần merge:* vào **Settings → Pages → Source: Deploy from a branch → Branch: `arena/01a0a585-brochure` / `(root)` → Save*.
@@ -115,6 +124,7 @@ Muốn người ngoài thấy thêm hình mã QR: đặt `ui.showQrSection: true
 - **Brochure là nhân vật chính**: 2 mặt chiếm gần trọn màn hình, bấm vào ảnh là mở xem lớn (← →, ESC, kéo/vuốt, phóng to).
 - **Song ngữ VI/EN**: nút VI/EN ở góc trên, tự nhận ngôn ngữ trình duyệt, ghi nhớ lựa chọn, hỗ trợ `?lang=en`; ảnh brochure đổi theo bản VI/EN.
 - **Mã QR cố định**: file SVG/PNG trong `assets/qr/`, trang in riêng, có công cụ xem trước link khác.
+- **Biết link đã sống chưa**: `npm run live` kiểm tra HTTP + nội dung trang.
 - **Thành viên**: tên + MSSV (hỗ trợ thêm vai trò và link cá nhân) dạng dải gọn.
 - **Khác**: responsive tới 320 px, dark mode, tôn trọng `prefers-reduced-motion`, không framework, không bước build.
 

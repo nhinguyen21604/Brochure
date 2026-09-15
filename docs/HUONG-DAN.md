@@ -51,6 +51,10 @@ fileNames: {
 ## Bước 3 — Lấy link thật và tạo mã QR
 
 1. Đưa web lên mạng (làm một lần, khoảng 1 phút):
+   - **Xử lý repo private trước:** GitHub Pages không chạy với repo private trên gói miễn phí. Chọn một trong hai:
+     đổi repo sang **Public** (*Settings → General → Danger zone → Change repository visibility → Public*) —
+     trong repo chỉ có trang brochure + tên/MSSV của nhóm; hoặc giữ private nếu tài khoản có **GitHub Pro**
+     (Student Pack miễn phí) / deploy bằng Netlify – Vercel.
    - **Merge PR** trên GitHub để nội dung vào nhánh `main`.
      *Muốn thử ngay không cần merge:* **Settings → Pages → Source: Deploy from a branch → Branch: `arena/01a0a585-brochure` / `(root)` → Save*.
    - Vào **Settings → Pages**, chọn **Source: Deploy from a branch**, **Branch: `main` / `(root)`** → Save.
@@ -102,7 +106,7 @@ Mở `assets/css/style.css`, sửa biến `--brand` và `--accent` ở khối `:
 Xem `tools/README-qr.md` — thường là do in quá nhỏ, mất vùng trắng quanh mã, hoặc in mã nhạt.
 
 **Vì sao mã QR quét không mở được?**
-Kiểm tra theo thứ tự: (1) `npm run live` xem link đã lên mạng chưa — nếu chưa thì bật GitHub Pages; (2) link trong `assets/js/config.js` có khớp link thật không, nếu khác thì chạy lại `npm run qr`; (3) mã in có bị nhỏ quá (< 2 cm) hoặc mất vùng trắng quanh mã không.
+Kiểm tra theo thứ tự: (0) repo còn ở chế độ **Private** thì GitHub Pages không chạy trên gói miễn phí — đổi sang Public hoặc dùng GitHub Pro / Netlify – Vercel; (1) `npm run live` xem link đã lên mạng chưa — nếu chưa thì bật GitHub Pages; (2) link trong `assets/js/config.js` có khớp link thật không, nếu khác thì chạy lại `npm run qr`; (3) mã in có bị nhỏ quá (< 2 cm) hoặc mất vùng trắng quanh mã không.
 
 **Sao tôi mở link mà không thấy nút tải QR?**
 Đúng như thiết kế — công cụ chỉ hiện ở chế độ nội bộ: thêm `?tools=1` vào cuối link (ví dụ `.../index.html?tools=1`).
