@@ -59,6 +59,9 @@
 
   /* ---------------------------------------------------------------- Đa ngữ */
   const DICTS = CFG.i18n || {};
+  /* Tên ngôn ngữ luôn viết đầy đủ và giữ nguyên tiếng gốc (không viết tắt VI/EN)
+     để ai cũng nhận ra ngôn ngữ của mình, kể cả khi chưa đọc được bản đang xem. */
+  const LANG_NAMES = { vi: "Tiếng Việt", en: "English" };
   let lang = detectLang();
 
   function detectLang() {
@@ -83,7 +86,7 @@
     return value[lang] || value.vi || value.en || "";
   }
 
-  function applyLanguage(next) {
+  function applyLanguage(next, opts) {
     lang = DICTS[next] ? next : "vi";
     store.set(LANG_KEY, lang);
     document.documentElement.lang = lang;
@@ -104,15 +107,24 @@
     $$("[data-lang-btn]").forEach((btn) => {
       const target = btn.getAttribute("data-lang-btn");
       const on = target === lang;
-      const label = target === "vi" ? "Tiếng Việt" : "English";
-      const action = target === "vi"
-        ? (lang === "vi" ? "Tiếng Việt đang được chọn" : "Chuyển sang Tiếng Việt")
-        : (lang === "en" ? "English is selected" : "Switch to English");
+      const name = LANG_NAMES[target] || target;
+      // Nút đang dùng: "Tiếng Việt — đang được chọn"; nút kia: "Chuyển sang English"
+      const state = on ? `${name} — ${t("lang.current")}` : `${t("lang.switchTo")} ${name}`;
       btn.classList.toggle("is-active", on);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
-      btn.setAttribute("aria-label", action);
-      btn.setAttribute("title", label);
+      btn.setAttribute("aria-label", state);
+      btn.setAttribute("title", state);
     });
+
+    const langGroup = $(".lang");
+    if (langGroup) langGroup.setAttribute("aria-label", t("lang.group"));
+
+    // Báo cho trình đọc màn hình biết đã đổi ngôn ngữ (chỉ khi người xem tự bấm nút,
+    // không báo lúc trang mới mở để khỏi ồn)
+    if (opts && opts.announce) {
+      const status = $("#langStatus");
+      if (status) status.textContent = `${t("lang.changed")} ${LANG_NAMES[lang] || lang}`;
+    }
 
     renderHero();
     renderMembers();
@@ -864,7 +876,9 @@
     applyVisibility();
     applyLanguage(lang);
     $$("[data-lang-btn]").forEach((btn) =>
-      btn.addEventListener("click", () => applyLanguage(btn.getAttribute("data-lang-btn")))
+      btn.addEventListener("click", () =>
+        applyLanguage(btn.getAttribute("data-lang-btn"), { announce: true })
+      )
     );
     const year = $("#year");
     if (year) year.textContent = String(new Date().getFullYear());
