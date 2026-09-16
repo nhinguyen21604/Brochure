@@ -6,7 +6,7 @@
  *   npm run live -- https://link-khac/      ← kiểm tra link khác
  *
  * Nó sẽ cho biết: HTTP status, có phải trang brochure không, có thấy
- * "Nhóm 1" + 4 MSSV không, và mã QR trong assets/qr có khớp link này không.
+ * nội dung chính theo config không, và mã QR trong assets/qr có khớp link này không.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -20,7 +20,7 @@ const ok = (s) => `\x1b[32m✔\x1b[0m ${s}`;
 const warn = (s) => `\x1b[33m▲\x1b[0m ${s}`;
 const bad = (s) => `\x1b[31m✖\x1b[0m ${s}`;
 
-/* đọc link + MSSV từ config.js */
+/* đọc link và nội dung công khai từ config.js */
 const src = fs.readFileSync(path.join(ROOT, "assets", "js", "config.js"), "utf8");
 const win = {};
 new Function("window", "document", "navigator", "localStorage", src)(
@@ -63,11 +63,14 @@ const base = new URL(target);
 const configRes = await fetch(new URL("assets/js/config.js", base).href, { redirect: "follow" });
 const configText = configRes.ok ? await configRes.text() : "";
 
+const groupNames = [cfg.group?.vi, cfg.group?.en].filter(Boolean);
+const memberNames = (cfg.members || []).map((m) => m.name).filter(Boolean);
+const memberIds = (cfg.members || []).map((m) => m.id).filter(Boolean);
 const checks = [
-  ["trang có tiêu đề / tên nhóm", /Nhóm 1|Group 1/i.test(html)],
+  ["trang có tên nhóm / tiêu đề theo config", groupNames.length ? groupNames.some((name) => html.includes(name)) : /brochure/i.test(html)],
   ["trang có khung brochure", /brochureFaces|assets\/brochure/i.test(html)],
-  ["config.js có đủ 4 MSSV", ["H2200161", "H2200004", "H2200106", "H2200107"].every((id) => configText.includes(id))],
-  ["config.js có tên 4 thành viên", ["Tô Thanh Mai", "Bùi Trần Trà My", "Nguyễn Ngọc Hoàng Nhi", "Nguyễn Ngọc Thảo Nguyên"].every((n) => configText.includes(n))],
+  ["config.js có danh sách thành viên", memberNames.length > 0 && memberNames.every((name) => configText.includes(name))],
+  ["config.js có mã/ID thành viên nếu đã khai báo", memberIds.length === 0 || memberIds.every((id) => configText.includes(id))],
 ];
 
 /* Phần nội bộ nằm trong HTML nhưng bị ẩn bằng CSS khi chưa có JS:

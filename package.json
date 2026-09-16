@@ -1,8 +1,8 @@
 {
-  "name": "brochure-group1",
+  "name": "brochure-site",
   "version": "1.0.0",
   "private": true,
-  "description": "Web nhỏ cho brochure 2 mặt song ngữ (VI/EN) của nhóm 1 — kèm mã QR quét là mở trang và thông tin thành viên.",
+  "description": "Static bilingual brochure site with QR support.",
   "type": "module",
   "scripts": {
     "start": "node tools/serve.mjs",

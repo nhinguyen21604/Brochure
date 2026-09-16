@@ -102,9 +102,16 @@
         });
     });
     $$("[data-lang-btn]").forEach((btn) => {
-      const on = btn.getAttribute("data-lang-btn") === lang;
+      const target = btn.getAttribute("data-lang-btn");
+      const on = target === lang;
+      const label = target === "vi" ? "Tiếng Việt" : "English";
+      const action = target === "vi"
+        ? (lang === "vi" ? "Tiếng Việt đang được chọn" : "Chuyển sang Tiếng Việt")
+        : (lang === "en" ? "English is selected" : "Switch to English");
       btn.classList.toggle("is-active", on);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.setAttribute("aria-label", action);
+      btn.setAttribute("title", label);
     });
 
     renderHero();
@@ -203,6 +210,7 @@
       const card = document.createElement("figure");
       card.className = "face";
       card.dataset.index = String(idx);
+      card.dataset.number = String(idx + 1).padStart(2, "0");
 
       const label = document.createElement("figcaption");
       label.className = "face__label";
@@ -268,16 +276,28 @@
     img.loading = "lazy";
     img.decoding = "async";
 
-    const hint = document.createElement("span");
-    hint.className = "face__hint";
-    hint.setAttribute("aria-hidden", "true");
-    hint.textContent = `⤢ ${t("brochure.zoom")}`;
-
-    openBtn.append(img, hint);
+    openBtn.appendChild(img);
     openBtn.addEventListener("click", () => lightbox.open(Number(card.dataset.index)));
     frame.appendChild(openBtn);
 
+    const toolbar = document.createElement("div");
+    toolbar.className = "face__toolbar";
+
+    const enlarge = document.createElement("button");
+    enlarge.type = "button";
+    enlarge.className = "btn btn--ghost btn--sm";
+    enlarge.textContent = `⤢ ${t("brochure.zoom")}`;
+    enlarge.setAttribute("aria-label", `${t("brochure.zoom")} — ${face.label}`);
+    enlarge.addEventListener("click", () => lightbox.open(Number(card.dataset.index)));
+
+    const count = document.createElement("span");
+    count.className = "face__count";
+    count.textContent = `${Number(card.dataset.index) + 1}/${state.faces.length} · ${face.label}`;
+
+    toolbar.append(enlarge, count);
+
     const actions = $(".face__actions", card);
+    card.insertBefore(toolbar, actions);
     actions.setAttribute("data-internal", "");   // công cụ tải ảnh: chỉ nhóm thấy
     actions.hidden = !isTools;
     const dl = document.createElement("a");
