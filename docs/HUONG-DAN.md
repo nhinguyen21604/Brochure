@@ -1,6 +1,6 @@
 # Hướng dẫn chi tiết (tiếng Việt)
 
-Tài liệu này dành cho nhóm 1 — làm theo thứ tự là xong.
+Tài liệu thao tác nội bộ — làm theo thứ tự là xong.
 
 ## Bước 0 — Xem web đang có gì
 
@@ -16,10 +16,10 @@ Bấm vào bất kỳ ảnh brochure nào để mở xem lớn (phím ← → đ
 
 Mở `assets/js/config.js`, sửa các mục:
 
-- `group`: tên nhóm (mặc định “Nhóm 1”).
+- `group`: tên nhóm hiển thị trên trang.
 - `title`, `subtitle`: tiêu đề và mô tả ngắn.
 - `course`, `className`, `lecturer`, `period`: điền nếu muốn hiện ở khối đầu trang (để `""` nếu không cần).
-- `members`: tên + MSSV (đã điền sẵn 4 thành viên). Thêm `role` (vai trò) hoặc `link` (trang cá nhân) nếu muốn.
+- `members`: danh sách thành viên hiển thị trên trang. Thêm `role` (vai trò) hoặc `link` (trang cá nhân) nếu muốn.
 
 ## Bước 2 — Chèn ảnh brochure
 
@@ -62,12 +62,12 @@ fileNames: {
 ## Bước 3 — Lấy link thật và tạo mã QR
 
 1. Đưa web lên mạng (làm một lần, khoảng 1 phút):
-   - **Repo Public + `noindex` (đang dùng):** đổi repo sang **Public** (*Settings → General → Danger zone → Change repository visibility → Public*) + giữ thẻ `noindex` trong `index.html` để Google không tìm thấy trang brochure. Trong repo chỉ có trang brochure + tên/MSSV của nhóm. Đây là cách nhóm đang chọn: người có link/QR vẫn mở được, ảnh xem trước Zalo/Facebook vẫn hiện, nhưng gõ tên nhóm trên Google không thấy trang.
+   - Nếu repo đang Public: giữ thẻ `noindex` trong `index.html` để hạn chế công cụ tìm kiếm lập chỉ mục trang brochure. Người có link/QR vẫn mở được.
    - Nếu muốn giữ repo private: cần **GitHub Pro** (Student Pack miễn phí) để Pages chạy với repo private, hoặc deploy bằng **Netlify/Vercel**.
    - **Merge PR** trên GitHub để nội dung vào nhánh `main`.
-     *Muốn thử ngay không cần merge:* **Settings → Pages → Source: Deploy from a branch → Branch: `arena/01a0a819-brochure` / `(root)` → Save*.
+     *Muốn thử ngay không cần merge:* có thể chọn nhánh làm việc hiện tại trong **Settings → Pages**.
    - Vào **Settings → Pages**, chọn **Source: Deploy from a branch**, **Branch: `main` / `(root)`** → Save.
-   - Kiểm tra lại trên máy bạn: `npm run live` (báo HTTP 200, thấy đúng “Nhóm 1”, khung brochure, 4 MSSV, và “trang KHÔNG bị Google đánh chỉ mục”).
+   - Kiểm tra lại trên máy bạn: `npm run live` (báo HTTP 200, thấy đúng trang brochure, thông tin trong cấu hình, và thẻ noindex).
      Lệnh này cần internet nên hãy chạy ở máy bạn, không chạy trong môi trường sandbox.
    - *Lưu ý:* thẻ `noindex` chỉ chặn trang web `*.github.io/...`. Trang mã nguồn `github.com/...` vẫn có thể được Google tìm thấy vì `robots.txt` của GitHub không chặn trang chính repo. Muốn kín cả mã nguồn thì dùng Private + Netlify/Vercel.
 2. Sửa `SITE_CONFIG.url` trong `assets/js/config.js` thành link thật (giữ `/` ở cuối).
@@ -86,7 +86,7 @@ fileNames: {
 
 - [ ] Mở link bằng điện thoại: trang hiển thị đúng, ảnh brochure rõ, không tràn ngang.
 - [ ] Nút VI/EN đổi đúng nội dung giao diện; nút phóng to ảnh hoạt động.
-- [ ] 4 thành viên hiện đủ tên + MSSV, đúng chính tả (nhớ dấu tiếng Việt).
+- [ ] Thông tin thành viên hiển thị đúng theo nội dung nhóm muốn công khai.
 - [ ] Quét mã QR từ **bản in giấy** → mở đúng trang (thử 2 điện thoại, 2 app camera khác nhau).
 - [ ] `npm run live` báo HTTP 200 — link QR thật sự mở được.
 - [ ] `npm run check` không còn mục ✖ nào (báo cả trường hợp mã QR lệch link).
@@ -95,7 +95,7 @@ fileNames: {
 
 ## Ai thấy gì trên trang?
 
-**Người ngoài (link thường)** chỉ thấy: phần giới thiệu, 2 mặt brochure, 4 thành viên.
+**Người ngoài (link thường)** chỉ thấy: phần giới thiệu, 2 mặt brochure và phần thông tin công khai trên trang.
 
 **Chỉ nhóm (link có `?tools=1`)** mới thấy: ô nhập link QR, nút tải PNG/SVG, nút sao chép link, trang in QR, mẹo in ấn, đường dẫn file ảnh cần thả vào, ghi chú deploy.
 
