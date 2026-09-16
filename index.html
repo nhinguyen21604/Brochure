@@ -194,6 +194,7 @@
     <span class="lb__caption" data-lb-caption>1/2</span>
     <div class="lb__tools">
       <button type="button" class="lb__btn" data-lb-zoom aria-pressed="false"
+              title="Phóng to để đọc chữ nhỏ" aria-label="Phóng to để đọc chữ nhỏ"
               data-i18n-attr="title:lightbox.zoomIn; aria-label:lightbox.zoomIn">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
           <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.9"/>
@@ -201,12 +202,14 @@
         </svg>
       </button>
       <a class="lb__btn" data-lb-open data-internal href="#" hidden target="_blank" rel="noopener"
+         title="Mở ảnh gốc" aria-label="Mở ảnh gốc"
          data-i18n-attr="title:lightbox.openRaw; aria-label:lightbox.openRaw">
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false">
           <path d="M14 4h6v6M20 4l-8 8M10 20H4v-6M4 20l8-8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
       <button type="button" class="lb__btn" data-close
+              title="Đóng" aria-label="Đóng"
               data-i18n-attr="title:lightbox.close; aria-label:lightbox.close">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
           <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
@@ -215,6 +218,7 @@
     </div>
   </div>
   <button type="button" class="lb__nav lb__nav--prev" data-lb-prev
+          title="Xem mặt trước" aria-label="Xem mặt trước"
           data-i18n-attr="title:lightbox.prev; aria-label:lightbox.prev">
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
       <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -222,6 +226,7 @@
   </button>
   <div class="lb__stage"><div class="lb__empty">…</div></div>
   <button type="button" class="lb__nav lb__nav--next" data-lb-next
+          title="Xem mặt sau" aria-label="Xem mặt sau"
           data-i18n-attr="title:lightbox.next; aria-label:lightbox.next">
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
       <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
