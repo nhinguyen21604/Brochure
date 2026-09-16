@@ -46,6 +46,19 @@ try {
 
 console.log(status === 200 ? ok(`HTTP ${status} — trang đã lên mạng`) : bad(`HTTP ${status} — trang chưa sẵn sàng`));
 
+/* kiểm tra thẻ noindex có thật sự được phục vụ qua HTTP (không chỉ nằm trong file nguồn) */
+{
+  const hasRobots = /<meta[^>]+name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html);
+  const hasGoogle = /<meta[^>]+name=["']googlebot["'][^>]*content=["'][^"']*noindex/i.test(html);
+  if (hasRobots && hasGoogle) {
+    console.log(ok("trang KHÔNG bị Google đánh chỉ mục (có thẻ noindex + googlebot) — người có link/QR vẫn mở được"));
+  } else if (hasRobots) {
+    console.log(warn("trang có robots=noindex nhưng thiếu thẻ googlebot — vẫn chặn được Google, nên thêm cho đồng bộ"));
+  } else {
+    console.log(warn("trang KHÔNG có thẻ noindex — Google có thể đánh chỉ mục trang này (nếu muốn chặn, thêm <meta name=\"robots\" content=\"noindex, nofollow\"> vào index.html)"));
+  }
+}
+
 const base = new URL(target);
 const configRes = await fetch(new URL("assets/js/config.js", base).href, { redirect: "follow" });
 const configText = configRes.ok ? await configRes.text() : "";

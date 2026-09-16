@@ -62,16 +62,14 @@ fileNames: {
 ## Bước 3 — Lấy link thật và tạo mã QR
 
 1. Đưa web lên mạng (làm một lần, khoảng 1 phút):
-   - **Xử lý repo private trước:** GitHub Pages không chạy với repo private trên gói miễn phí. Chọn một trong hai:
-     đổi repo sang **Public** (*Settings → General → Danger zone → Change repository visibility → Public*) —
-     trong repo chỉ có trang brochure + tên/MSSV của nhóm; hoặc giữ private nếu tài khoản có **GitHub Pro**
-     (Student Pack miễn phí) / deploy bằng Netlify – Vercel.
+   - **Repo Public + `noindex` (đang dùng):** đổi repo sang **Public** (*Settings → General → Danger zone → Change repository visibility → Public*) + giữ thẻ `noindex` trong `index.html` để Google không tìm thấy trang brochure. Trong repo chỉ có trang brochure + tên/MSSV của nhóm. Đây là cách nhóm đang chọn: người có link/QR vẫn mở được, ảnh xem trước Zalo/Facebook vẫn hiện, nhưng gõ tên nhóm trên Google không thấy trang.
+   - Nếu muốn giữ repo private: cần **GitHub Pro** (Student Pack miễn phí) để Pages chạy với repo private, hoặc deploy bằng **Netlify/Vercel**.
    - **Merge PR** trên GitHub để nội dung vào nhánh `main`.
-     *Muốn thử ngay không cần merge:* **Settings → Pages → Source: Deploy from a branch → Branch: `arena/01a0a585-brochure` / `(root)` → Save*.
+     *Muốn thử ngay không cần merge:* **Settings → Pages → Source: Deploy from a branch → Branch: `arena/01a0a819-brochure` / `(root)` → Save*.
    - Vào **Settings → Pages**, chọn **Source: Deploy from a branch**, **Branch: `main` / `(root)`** → Save.
-   - Kiểm tra lại trên máy bạn: `npm run live` (báo HTTP 200 và thấy đúng “Nhóm 1”, khung brochure, 4 MSSV).
+   - Kiểm tra lại trên máy bạn: `npm run live` (báo HTTP 200, thấy đúng “Nhóm 1”, khung brochure, 4 MSSV, và “trang KHÔNG bị Google đánh chỉ mục”).
      Lệnh này cần internet nên hãy chạy ở máy bạn, không chạy trong môi trường sandbox.
-   - *Lưu ý:* nếu repo là riêng tư, GitHub Pages chỉ chạy khi tài khoản có gói hỗ trợ — nhóm có thể đổi sang Netlify/Vercel (kéo–thả thư mục) hoặc để repo ở chế độ công khai.
+   - *Lưu ý:* thẻ `noindex` chỉ chặn trang web `*.github.io/...`. Trang mã nguồn `github.com/...` vẫn có thể được Google tìm thấy vì `robots.txt` của GitHub không chặn trang chính repo. Muốn kín cả mã nguồn thì dùng Private + Netlify/Vercel.
 2. Sửa `SITE_CONFIG.url` trong `assets/js/config.js` thành link thật (giữ `/` ở cuối).
 3. Xuất lại mã QR và mở trang in:
 
@@ -105,6 +103,21 @@ Muốn người ngoài thấy thêm hình mã QR (không kèm công cụ): đặ
 Muốn tắt hẳn `?tools=1`: đặt `ui.allowToolsQuery: false`.
 
 *Lưu ý:* cách này chỉ ẩn trên **trang web đã deploy**. Mã nguồn và thư mục `tools/`, `docs/` vẫn nằm trong repo GitHub — nếu cần giấu cả mã nguồn thì để repo ở chế độ **Private** hoặc deploy bằng Netlify/Vercel ở chế độ riêng tư.
+
+### Chặn Google (noindex) — đang bật
+
+Trang `index.html` và `qr-print.html` có:
+
+```html
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+```
+
+→ Quét QR hoặc có link vẫn mở bình thường, ảnh xem trước khi dán vào Zalo/Facebook vẫn hiện, nhưng **gõ tên nhóm trên Google sẽ không thấy trang này**.
+
+- `npm run check` mục 6 sẽ báo động nếu ai vô tình xóa mất thẻ này.
+- `npm run live` kiểm tra thẻ này **có thật sự được phục vụ** trên trang đã deploy (không chỉ nằm trong file nguồn).
+- Muốn cho Google tìm thấy lại: xóa 2 dòng trên khỏi `index.html` (và `qr-print.html`).
 
 ## Câu hỏi thường gặp
 
