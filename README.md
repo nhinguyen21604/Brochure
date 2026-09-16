@@ -47,12 +47,19 @@ thêm `--write` để nén tại chỗ (bản gốc được giữ lại thành 
 
 ## 3. Đưa lên mạng để mã QR quét được
 
-> ⚠️ **Repo hiện đang ở chế độ Private.** GitHub Pages **không chạy được với repo private trên gói miễn phí** —
-> nên đây là việc đầu tiên cần xử lý, làm một trong hai cách:
+> **Bạn đã chọn: Public + `noindex`** — trang web brochure mở được bằng link/QR nhưng **không hiện trên Google**.
+> Ảnh xem trước khi dán link lên Zalo/Facebook vẫn hiện bình thường. Nếu sau này muốn trang được Google tìm thấy,
+> chỉ cần xóa 2 dòng `<meta name="robots"...>` trong `index.html`.
 >
-> - **Cách A (đơn giản nhất):** đổi repo sang Public — **Settings → General → cuối trang (Danger zone) →
->   Change repository visibility → Public**. Nội dung repo chỉ gồm trang brochure + tên và MSSV của 4 thành viên
->   (những thông tin này vốn đã in trên brochure nộp cho giảng viên).
+> ℹ️ Lưu ý: thẻ `noindex` chỉ chặn trang web `*.github.io/Brochure/`. Trang mã nguồn
+> `github.com/nhinguyen21604/Brochure` vẫn có thể được Google đánh chỉ mục vì `robots.txt` của GitHub
+> không chặn trang chính của repo. Muốn kín tuyệt đối cả mã nguồn thì dùng repo **Private + Netlify/Vercel**.
+>
+> Nếu repo đang ở Private: GitHub Pages **không chạy được với repo private trên gói miễn phí** — xử lý bằng một trong hai cách:
+>
+> - **Cách A (đang dùng):** đổi repo sang Public — **Settings → General → cuối trang (Danger zone) →
+>   Change repository visibility → Public** + giữ thẻ `noindex` để Google không tìm thấy trang brochure.
+>   Nội dung repo chỉ gồm trang brochure + tên và MSSV của 4 thành viên (những thông tin này vốn đã in trên brochure nộp cho giảng viên).
 > - **Cách B:** giữ repo private nếu tài khoản có **GitHub Pro** (bản Student Pack được miễn phí) — khi đó Pages
 >   chạy được với repo private; hoặc deploy bằng **Netlify/Vercel** (hai dịch vụ này cho phép deploy từ repo private).
 
@@ -131,6 +138,21 @@ Các phần **chỉ nhóm thấy** (mở bằng `?tools=1`, ví dụ `.../index.
 
 Phần nội bộ được giữ kín **cả khi người xem tắt JavaScript** (xem `docs/HUONG-DAN.md`).
 Muốn người ngoài thấy thêm hình mã QR: đặt `ui.showQrSection: true`. Muốn tắt hẳn `?tools=1`: đặt `ui.allowToolsQuery: false`.
+
+### Chặn Google tìm thấy trang brochure
+
+Trang `index.html` và `qr-print.html` đã có:
+
+```html
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+```
+
+→ Người có link hoặc quét QR **vẫn mở bình thường**, ảnh xem trước khi dán link lên Zalo/Facebook **vẫn hiện** (nhờ `og:image`), nhưng **gõ tên nhóm trên Google sẽ không thấy trang này**.
+
+- Kiểm tra nhanh: `npm run check` — mục 6 báo nếu ai vô tình xóa mất thẻ này.
+- Kiểm tra trên trang đã deploy: `npm run live` — báo “trang KHÔNG bị Google đánh chỉ mục”.
+- Muốn cho Google tìm thấy lại: xóa 2 dòng trên khỏi `index.html` (và `qr-print.html` nếu muốn).
 
 ## 7. Tính năng
 

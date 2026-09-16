@@ -154,6 +154,36 @@ console.log("\n=== 5. Cấu trúc bắt buộc ===");
   }
 });
 
+console.log("\n=== 6. Chặn Google đánh chỉ mục (noindex) ===");
+{
+  const files = ["index.html", "qr-print.html"];
+  const needRe = /<meta[^>]+name=["']robots["'][^>]*content=["'][^"']*noindex/i;
+  const needGoogle = /<meta[^>]+name=["']googlebot["'][^>]*content=["'][^"']*noindex/i;
+  for (const rel of files) {
+    const p = path.join(ROOT, rel);
+    if (!fs.existsSync(p)) {
+      problems.push(bad(`Thiếu ${rel} — không kiểm tra được noindex`));
+      continue;
+    }
+    const txt = fs.readFileSync(p, "utf8");
+    const hasRobots = needRe.test(txt);
+    const hasGoogle = needGoogle.test(txt);
+    if (hasRobots && hasGoogle) {
+      console.log(ok(`${rel} có thẻ noindex (robots + googlebot) — Google sẽ không đánh chỉ mục trang này`));
+    } else if (hasRobots) {
+      console.log(warn(`${rel} có robots=noindex nhưng thiếu thẻ googlebot — nên thêm cho đồng bộ`));
+    } else {
+      console.log(bad(`${rel} THIẾU thẻ noindex — Google có thể đánh chỉ mục trang này`));
+      problems.push(
+        bad(
+          `${rel} thiếu <meta name="robots" content="noindex, nofollow"> — thêm vào <head> để trang không hiện trên Google (xem README mục chặn Google)`
+        )
+      );
+    }
+  }
+  console.log("   → Nếu muốn trang được Google tìm thấy, hãy xóa 2 thẻ noindex này.");
+}
+
 console.log("\n=== Kết luận ===");
 if (problems.length) {
   problems.forEach((p) => console.log(p));
