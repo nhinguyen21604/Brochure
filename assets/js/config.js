@@ -85,12 +85,19 @@ window.SITE_CONFIG = {
    *
    *  Mẹo: ảnh brochure chiếm gần trọn màn hình, nên xuất ảnh dài cạnh
    *  ~1600–2400 px cho nét khi bấm xem lớn.
+   *
+   *  Tải nhanh trên điện thoại: để cạnh bản .png còn có bản .webp cùng tên
+   *  (web sẽ tự chọn bản nhẹ hơn). Khi bạn thay ảnh mới, tạo lại bản .webp:
+   *      npm i --no-save sharp && npm run images -- --write
+   *  hoặc xoá các file .webp cũ để web dùng thẳng ảnh gốc.
    * ------------------------------------------------------------------ */
   brochure: {
     root: "assets/brochure",
 
-    // Các đuôi file sẽ được thử lần lượt
-    extensions: ["jpg", "jpeg", "png", "webp", "avif"],
+    // Các đuôi file sẽ được thử lần lượt.
+    // .webp đứng đầu vì nhẹ hơn PNG 3–4 lần → điện thoại mở nhanh hơn hẳn.
+    // Nếu chưa có file .webp nào, web tự dùng .png/.jpg như cũ.
+    extensions: ["webp", "avif", "jpg", "jpeg", "png"],
 
     // Tên file (không kèm đuôi) được thử lần lượt cho từng mặt
     fileNames: {
@@ -124,6 +131,8 @@ window.SITE_CONFIG = {
 
       "brochure.desc": "Bấm vào ảnh để xem lớn.",
       "brochure.viewerHint": "Kéo ngang để xem mặt còn lại",
+      "brochure.facesLabel": "Chọn mặt brochure",
+      "brochure.loading": "Đang tải brochure…",
       "brochure.langTag": "Bản",
       "brochure.zoom": "Xem lớn",
       "brochure.download": "Tải ảnh",
@@ -160,9 +169,13 @@ window.SITE_CONFIG = {
 
       "lightbox.title": "Xem brochure",
       "lightbox.close": "Đóng",
-      "lightbox.prev": "Mặt trước",
-      "lightbox.next": "Mặt sau",
+      "lightbox.prev": "Xem mặt trước",
+      "lightbox.next": "Xem mặt sau",
+      "lightbox.zoomIn": "Phóng to để đọc chữ nhỏ",
+      "lightbox.zoomOut": "Thu nhỏ lại",
       "lightbox.openRaw": "Mở ảnh gốc",
+
+      "tools.badge": "Chế độ nội bộ",
     },
 
     en: {
@@ -180,6 +193,8 @@ window.SITE_CONFIG = {
 
       "brochure.desc": "Click an image to view it larger.",
       "brochure.viewerHint": "Swipe to see the other side",
+      "brochure.facesLabel": "Choose a brochure side",
+      "brochure.loading": "Loading brochure…",
       "brochure.langTag": "Edition",
       "brochure.zoom": "Enlarge",
       "brochure.download": "Download image",
@@ -216,9 +231,13 @@ window.SITE_CONFIG = {
 
       "lightbox.title": "View brochure",
       "lightbox.close": "Close",
-      "lightbox.prev": "Previous",
-      "lightbox.next": "Next",
+      "lightbox.prev": "Go to previous side",
+      "lightbox.next": "Go to next side",
+      "lightbox.zoomIn": "Zoom in to read the small print",
+      "lightbox.zoomOut": "Zoom out",
       "lightbox.openRaw": "Open original image",
+
+      "tools.badge": "Internal mode",
     },
   },
 };

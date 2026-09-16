@@ -10,7 +10,10 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
 <meta name="theme-color" content="#0f766e">
-<meta name="color-scheme" content="light dark">
+<!-- Trang luôn ở giao diện SÁNG, không tự chuyển tối theo cài đặt điện thoại:
+     người xem chủ yếu quét QR bằng điện thoại, nền sáng giữ đúng màu bản in
+     brochure và dễ đọc ngoài trời. Đổi thành "light dark" nếu muốn theo hệ thống. -->
+<meta name="color-scheme" content="light">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/img/favicon.svg">
 <!-- OG/Twitter cần link tuyệt đối. Sau khi deploy, đổi 3 link dưới cho khớp SITE_CONFIG.url -->
@@ -94,6 +97,11 @@
     <div class="wrap wrap--wide">
       <p class="showcase__hint" data-i18n="brochure.desc">Bấm vào ảnh để xem lớn.</p>
 
+      <!-- Dải chọn mặt: chỉ hiện trên màn hẹp (1 cột), giúp biết ngay có 2 mặt
+           và nhảy tới mặt cần xem mà không phải cuộn tay hết trang. -->
+      <nav class="faceJump" id="faceJump" aria-label="Chọn mặt brochure"
+           data-i18n-attr="aria-label:brochure.facesLabel" hidden></nav>
+
       <div class="faces" id="brochureFaces" style="--faces:2"></div>
       <p class="swipeHint" data-i18n="brochure.viewerHint">Kéo ngang để xem mặt còn lại</p>
 
@@ -104,10 +112,17 @@
   </section>
 
   <!-- ===================== THÀNH VIÊN (một dải gọn) ===================== -->
+  <!-- Trên điện thoại khối này thu lại thành accordion (mặc định đóng) để
+       brochure là nhân vật chính; trên máy tính vẫn mở sẵn như cũ. -->
   <section class="team" id="team">
     <div class="wrap">
-      <h2 class="team__title" data-i18n="team.title">Thành viên nhóm</h2>
-      <div class="members" id="memberGrid"></div>
+      <details class="teamBox" id="teamBox">
+        <summary class="team__summary">
+          <span class="team__title" data-i18n="team.title">Thành viên nhóm</span>
+          <span class="team__chev" aria-hidden="true"></span>
+        </summary>
+        <div class="members" id="memberGrid"></div>
+      </details>
     </div>
   </section>
 
@@ -176,27 +191,48 @@
 <div class="lb" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Xem brochure"
      data-i18n-attr="aria-label:lightbox.title">
   <div class="lb__bar">
-    <span class="lb__caption">1/2</span>
+    <span class="lb__caption" data-lb-caption>1/2</span>
     <div class="lb__tools">
-      <button type="button" class="lb__btn" data-lb-zoom
-              data-i18n-attr="title:brochure.zoom; aria-label:brochure.zoom">⤢</button>
+      <button type="button" class="lb__btn" data-lb-zoom aria-pressed="false"
+              data-i18n-attr="title:lightbox.zoomIn; aria-label:lightbox.zoomIn">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+          <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.9"/>
+          <path d="M15.6 15.6 21 21M10.5 7.6v5.8M7.6 10.5h5.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </button>
       <a class="lb__btn" data-lb-open data-internal href="#" hidden target="_blank" rel="noopener"
-         data-i18n-attr="title:lightbox.openRaw; aria-label:lightbox.openRaw">↗</a>
+         data-i18n-attr="title:lightbox.openRaw; aria-label:lightbox.openRaw">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false">
+          <path d="M14 4h6v6M20 4l-8 8M10 20H4v-6M4 20l8-8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
       <button type="button" class="lb__btn" data-close
-              data-i18n-attr="title:lightbox.close; aria-label:lightbox.close">✕</button>
+              data-i18n-attr="title:lightbox.close; aria-label:lightbox.close">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </div>
   <button type="button" class="lb__nav lb__nav--prev" data-lb-prev
-          data-i18n-attr="title:lightbox.prev; aria-label:lightbox.prev">‹</button>
+          data-i18n-attr="title:lightbox.prev; aria-label:lightbox.prev">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
   <div class="lb__stage"><div class="lb__empty">…</div></div>
   <button type="button" class="lb__nav lb__nav--next" data-lb-next
-          data-i18n-attr="title:lightbox.next; aria-label:lightbox.next">›</button>
+          data-i18n-attr="title:lightbox.next; aria-label:lightbox.next">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
 </div>
 
 <!-- Nhãn chỉ hiện ở chế độ nội bộ (?tools=1) để nhóm biết mình đang xem bản đầy đủ -->
 <p class="toolsBadge" data-internal>
   <span aria-hidden="true">🔒</span>
-  <span data-i18n="qr.toolsNote">Chế độ nội bộ (chỉ nhóm thấy).</span>
+  <span data-i18n="tools.badge">Chế độ nội bộ</span>
   <a href="./" data-i18n="qr.toolsExit">Xem như người ngoài</a>
 </p>
 
