@@ -1,10 +1,20 @@
 /* =====================================================================
  *  style.css — brochure là nhân vật chính: phần giới thiệu gọn, hai mặt
  *  brochure chiếm gần trọn màn hình, thành viên chỉ là một dải nhỏ.
+ *
+ *  Mobile-first: người xem chính là điện thoại (quét QR), nên trên màn
+ *  hẹp mọi thứ được nén lại — header thấp, giới thiệu thành mini card,
+ *  ảnh brochure rộng ~96% màn hình, có dải chọn mặt, thành viên thu vào
+ *  accordion. Trang LUÔN ở giao diện sáng (không theo dark mode của máy).
+ *
  *  Bảng màu & kích thước nằm ở :root, đổi nhanh ở một chỗ.
  * ===================================================================== */
 
 :root {
+  /* Luôn dùng giao diện sáng, kể cả khi điện thoại đang bật chế độ tối:
+     giữ đúng màu bản in brochure và tránh mỏi mắt khi đọc ngoài trời. */
+  color-scheme: light;
+
   /* Bảng màu */
   --ink: #0f172a;
   --body: #3b4759;
@@ -25,6 +35,8 @@
   /* Kích thước & hình khối */
   --wrap: 1000px;          /* nội dung hẹp (giới thiệu, thành viên) */
   --wrap-wide: 1500px;     /* khung brochure — rộng tối đa để ảnh thật lớn */
+  --topbar-h: 76px;        /* chiều cao vùng header đang chiếm (để cuộn tới neo cho đúng) */
+  --jump-h: 0px;           /* chiều cao dải chọn mặt (chỉ có ở màn hẹp) */
   --radius: 18px;
   --radius-sm: 10px;
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, .05), 0 6px 16px -12px rgba(15, 23, 42, .18);
@@ -39,7 +51,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 76px;
+  scroll-padding-top: var(--topbar-h);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -219,6 +231,38 @@ button { font: inherit; }
   border-radius: 999px; box-shadow: var(--shadow-sm);
 }
 
+/* Dải chọn mặt — chỉ hiện khi 2 mặt xếp thành 1 cột (màn hẹp).
+   Dính ngay dưới header để lúc nào cũng biết mình đang ở mặt nào và
+   đổi mặt bằng một cú bấm, không phải cuộn tay qua ảnh dài. */
+.faceJump {
+  display: none;                    /* màn rộng: 2 mặt nằm cạnh nhau, không cần */
+  position: sticky; top: calc(var(--topbar-h) - 12px); z-index: 6;
+  width: fit-content; max-width: 100%;
+  margin: 0 auto clamp(.5rem, 1.5vw, .9rem);
+  padding: .18rem; gap: .18rem;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+.faceJump__btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  min-height: 40px; padding: .28rem .8rem;
+  border: 0; border-radius: 999px; background: transparent; color: var(--muted);
+  font-size: .82rem; font-weight: 650; white-space: nowrap; cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+.faceJump__btn:hover { background: color-mix(in srgb, var(--surface-2) 72%, transparent); color: var(--ink); }
+.faceJump__btn.is-active { background: var(--brand-soft); color: var(--brand-strong); }
+.faceJump__num {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: color-mix(in srgb, var(--brand) 13%, transparent);
+  font-size: .68rem; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.faceJump__btn.is-active .faceJump__num { background: color-mix(in srgb, var(--brand) 24%, transparent); }
+
 .faces {
   display: grid; gap: clamp(1.1rem, 2.4vw, 2rem);
   grid-template-columns: repeat(var(--faces, 2), minmax(0, 1fr));
@@ -231,6 +275,8 @@ button { font: inherit; }
   background: var(--surface); border: 1px solid color-mix(in srgb, var(--border) 92%, transparent);
   border-radius: calc(var(--radius) + 8px); overflow: hidden;
   box-shadow: var(--shadow-md);
+  /* cuộn tới mặt brochure thì chừa chỗ cho header + dải chọn mặt */
+  scroll-margin-top: calc(var(--topbar-h) + var(--jump-h) + 12px);
   transition: transform .24s var(--ease), border-color .24s var(--ease), box-shadow .24s var(--ease);
 }
 .face::before {
@@ -282,7 +328,27 @@ button { font: inherit; }
   transform: scale(1.008);
   box-shadow: 0 22px 42px -36px rgba(15, 23, 42, .45);
 }
-.face__loading { color: var(--muted); font-size: 1.3rem; letter-spacing: .3em; padding: 3rem 0; }
+/* Đang tải ảnh: khung xương nhẹ, không nhảy layout khi ảnh hiện ra */
+.face__loading {
+  display: grid; justify-items: center; align-content: center; gap: .75rem;
+  width: 100%; min-height: clamp(150px, 42vw, 320px);
+  padding: 1.6rem 1.2rem; color: var(--muted); font-size: .84rem; text-align: center;
+}
+.face__loading::before {
+  content: ""; width: min(240px, 62%); height: 6px; border-radius: 999px;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--border) 70%, transparent) 0%,
+      color-mix(in srgb, var(--brand-soft) 95%, transparent) 48%,
+      color-mix(in srgb, var(--accent-soft) 90%, transparent) 62%,
+      color-mix(in srgb, var(--border) 70%, transparent) 100%);
+  background-size: 240% 100%;
+  animation: faceSkel 1.6s var(--ease) infinite;
+}
+@keyframes faceSkel {
+  from { background-position: 130% 0; }
+  to   { background-position: -130% 0; }
+}
 
 /* Thanh thao tác công khai: mở lớn + số thứ tự mặt brochure */
 .face__toolbar {
@@ -291,7 +357,7 @@ button { font: inherit; }
   background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface-2) 44%, var(--surface)));
 }
 .face__toolbar .btn { min-height: 44px; }
-.face__count { margin-left: auto; color: var(--muted); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.face__count { margin-left: auto; color: var(--body); font-size: .8rem; font-weight: 650; letter-spacing: .01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 .face__actions { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; padding: .6rem .8rem; border-top: 1px solid var(--border); }
 .face__note { flex-basis: 100%; margin: 0; font-size: .82rem; color: var(--muted); }
@@ -321,10 +387,25 @@ button { font: inherit; }
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(12px);
 }
+/* Tiêu đề nhóm giờ nằm trong <summary>: trên máy tính mở sẵn, trên điện
+   thoại thu lại thành accordion để brochure không bị đẩy xuống dưới. */
+.team__summary {
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .2rem 0; cursor: pointer; list-style: none;
+  border-radius: 12px;
+}
+.team__summary::-webkit-details-marker { display: none; }
+.teamBox[open] .team__summary { margin-bottom: .95rem; }
+.team__chev {
+  flex: 0 0 auto; width: 9px; height: 9px; margin-top: -4px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg); transition: transform .22s var(--ease);
+}
+.teamBox[open] .team__chev { transform: rotate(-135deg); margin-top: 4px; }
 .team__title {
   position: relative; width: fit-content;
   font-family: var(--font); font-size: .78rem; font-weight: 800; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--muted); text-align: center; margin: 0 auto 1.05rem;
+  text-transform: uppercase; color: var(--muted); text-align: center; margin: 0;
 }
 .team__title::after {
   content: ""; display: block; width: 48px; height: 2px; margin: .45rem auto 0;
@@ -419,28 +500,40 @@ button { font: inherit; }
 /* ----------------------------------------------------------- Lightbox */
 .lb { position: fixed; inset: 0; z-index: 90; background: rgba(9, 14, 26, .94); display: grid; grid-template-rows: auto 1fr; backdrop-filter: blur(4px); }
 .lb[hidden] { display: none; }
-.lb__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 1rem; color: #e8ecf5; background: linear-gradient(180deg, rgba(255,255,255,.08), transparent); }
-.lb__caption { font-size: .86rem; letter-spacing: .04em; }
-.lb__tools { display: flex; gap: .4rem; }
+.lb__bar {
+  display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  padding: calc(.7rem + env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) .7rem max(1rem, env(safe-area-inset-left));
+  color: #e8ecf5; background: linear-gradient(180deg, rgba(255,255,255,.08), transparent);
+}
+.lb__caption { font-size: .86rem; font-weight: 600; letter-spacing: .01em; font-variant-numeric: tabular-nums; }
+.lb__tools { display: flex; gap: .4rem; flex: 0 0 auto; }
 .lb__btn {
-  width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
   background: rgba(255, 255, 255, .1); color: #fff; border: 1px solid rgba(255, 255, 255, .1); cursor: pointer;
-  font-size: 1rem; text-decoration: none; transition: background .2s var(--ease);
+  font-size: 1rem; text-decoration: none; transition: background .2s var(--ease), transform .2s var(--ease);
 }
 .lb__btn:hover { background: rgba(255, 255, 255, .22); }
-.lb__stage { grid-row: 2; overflow: auto; display: grid; place-items: center; padding: 0 clamp(.8rem, 5vw, 4rem) 2rem; }
-.lb__stage img { max-height: calc(100vh - 120px); max-width: 100%; border-radius: 8px; box-shadow: 0 30px 70px -30px #000; cursor: zoom-in; }
+.lb__btn svg { display: block; pointer-events: none; }
+.lb__stage {
+  grid-row: 2; overflow: auto; display: grid; place-items: center;
+  padding: 0 clamp(.8rem, 5vw, 4rem) 2rem;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+}
+.lb__stage img { max-height: calc(100vh - 130px); max-height: calc(100dvh - 130px); max-width: 100%; border-radius: 8px; box-shadow: 0 30px 70px -30px #000; cursor: zoom-in; }
 .lb__stage.is-zoomed { place-items: start center; }
 .lb__stage.is-zoomed img { max-height: none; max-width: none; width: min(2000px, 240vw); cursor: zoom-out; }
 .lb__empty { color: #cbd5e1; }
 .lb__nav {
   position: absolute; top: 50%; transform: translateY(-50%);
   width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+  display: grid; place-items: center;
   background: rgba(255, 255, 255, .12); color: #fff; font-size: 1.6rem; line-height: 1;
+  transition: background .2s var(--ease);
 }
+.lb__nav svg { display: block; pointer-events: none; }
 .lb__nav:hover { background: rgba(255, 255, 255, .25); }
-.lb__nav--prev { left: max(.5rem, 2vw); }
-.lb__nav--next { right: max(.5rem, 2vw); }
+.lb__nav--prev { left: max(.5rem, 2vw, env(safe-area-inset-left)); }
+.lb__nav--next { right: max(.5rem, 2vw, env(safe-area-inset-right)); }
 
 /* ------------------------------------------------------------ Reveal */
 .reveal { opacity: 0; transform: translateY(12px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
@@ -493,47 +586,152 @@ html:not(.js) [data-qr-section] { display: none !important; }
 @media print { .toolsBadge { display: none !important; } }
 
 /* ------------------------------------------------------- Responsive */
+/* Màn hẹp / máy tính bảng dọc: 2 mặt xếp thành 1 cột dọc, ảnh rộng hết cỡ
+   → cần dải chọn mặt để biết có 2 mặt và nhảy qua lại cho nhanh. */
 @media (max-width: 1024px) {
-  /* một mặt một hàng: ảnh to hết chiều ngang màn hình */
+  :root { --topbar-h: 70px; --jump-h: 46px; }
   .faces { grid-template-columns: 1fr; }
   .face__open img { max-height: none; }
   .face__frame { min-height: 0; }
+  .faceJump { display: flex; }
 }
 
+/* ---------------- Điện thoại: nén mọi thứ để brochure chiếm sân khấu ---------------- */
 @media (max-width: 720px) {
+  :root { --topbar-h: 62px; --jump-h: 44px; }
   body { font-size: 16px; }
-  .topbar { padding-top: .45rem; }
+
+  /* --- Header: 1 hàng thấp ~56px, mọi nút vẫn đủ lớn để bấm --- */
+  .topbar { padding: .35rem 0 .2rem; }
+  .topbar.is-stuck { padding-top: .3rem; }
   .topnav { display: none; }
-  .topbar__inner { min-height: 60px; gap: .65rem; padding-inline: .55rem; border-radius: 22px; }
+  .topbar__inner {
+    min-height: 54px; gap: .5rem;
+    padding: .3rem .35rem .3rem .5rem;
+    border-radius: 18px;
+  }
+  .brand { gap: .5rem; padding-left: 0; }
+  .brand__mark { width: 30px; height: 30px; border-radius: 10px; }
+  .brand__mark svg { width: 21px; height: 21px; }
   .brand__text small { display: none; }
-  html { scroll-padding-top: 70px; }
-  .lang { margin-left: auto; }
+  .brand__text strong { font-size: .9rem; }
+  .lang { margin-left: auto; min-height: 46px; padding: 2px; gap: 2px; }
+  .lang__icon { width: 24px; height: 24px; margin-left: .15rem; }
+  .lang__icon svg { width: 15px; height: 15px; }
   .lang__full { display: none; }
   .lang__short { display: inline; }
-  .lang__btn { min-width: 42px; padding-inline: .68rem; font-size: .8rem; font-weight: 700; letter-spacing: .05em; }
-  .qrCard { grid-template-columns: 1fr; }
-  .qrCard__code { order: -1; }
-  .face__open { cursor: pointer; }
-  .face__toolbar { align-items: stretch; }
-  .face__toolbar .btn { flex: 1 1 auto; }
-  .showcase .wrap--wide { padding: .55rem; border-radius: 24px; }
+  .lang__btn { min-width: 44px; min-height: 42px; padding-inline: .5rem; font-size: .82rem; font-weight: 700; letter-spacing: .04em; }
+  .lang__btn.is-active::after { bottom: 4px; width: 14px; }
+
+  /* --- Giới thiệu: mini card thấp (~130px), đọc là hiểu ngay --- */
+  .intro { padding: .55rem 0 .45rem; }
+  .intro__inner {
+    justify-items: start; text-align: left;
+    gap: 0; padding: .8rem .9rem .85rem 1.05rem;
+    border-radius: 18px; box-shadow: var(--shadow-md);
+  }
+  .intro__inner::before { display: none; }              /* bỏ mảng màu trang trí cho nhẹ mắt */
+  .intro__inner::after { width: 5px; top: 16%; height: 68%; }
+  .intro__group { margin-bottom: .3rem; padding: .16rem .5rem; font-size: .68rem; letter-spacing: .12em; }
+  .intro__title { max-width: none; font-size: clamp(1.45rem, 8vw, 2rem); line-height: 1.05; letter-spacing: -.03em; }
+  .intro__sub { margin: .35rem 0 0; font-size: .86rem; line-height: 1.45; }
+  .intro__meta { margin-top: .5rem; gap: .3rem; font-size: .74rem; }
+  .intro__meta li { padding: .22rem .48rem; }
+
+  /* --- Khung brochure: sát mép màn hình, ít khung lồng nhau --- */
+  .showcase .wrap--wide { width: min(100% - .6rem, var(--wrap-wide)); padding: .4rem; border-radius: 20px; }
   .showcase .wrap--wide::before { display: none; }
-  .showcase__hint { font-size: .8rem; }
-  .intro__inner { border-radius: 24px; }
-  .intro__title { max-width: 12ch; }
-  .face::before { width: 30px; height: 30px; right: .75rem; top: .75rem; }
-  .face__label { min-height: 62px; padding-right: 3rem; }
-  .team .wrap { border-radius: 24px; }
+  .showcase { padding-bottom: 1.6rem; }
+  .showcase__hint { margin-bottom: .5rem; padding: .32rem .7rem; font-size: .78rem; }
+  .faces { gap: .7rem; }
+  .face { border-radius: 16px; box-shadow: var(--shadow-sm); }
+  .face__label { min-height: 0; gap: .4rem; padding: .55rem .7rem .5rem; padding-right: 3rem; }
+  .face__tag { font-size: .6rem; padding: .12rem .42rem; }
+  .face__name { font-size: .85rem; }
+  .face::before { width: 26px; height: 26px; right: .6rem; top: .5rem; font-size: .72rem; }
+  .face__loading { min-height: 46vw; font-size: .8rem; }
+  .face__open { cursor: pointer; }
+
+  /* --- Toolbar dưới ảnh: nhãn mặt ở trên, nút "Xem lớn" full width --- */
+  .face__toolbar { flex-wrap: wrap; align-items: stretch; gap: .45rem; padding: .55rem .6rem .6rem; }
+  .face__count { order: -1; flex-basis: 100%; margin: 0; text-align: center; font-size: .78rem; }
+  .face__toolbar .btn { flex: 1 1 auto; min-height: 46px; font-size: .88rem; }
+  .face__actions { padding: .5rem .6rem; }
+  .face__actions .btn { flex: 1 1 auto; }
+
+  /* --- Thành viên: accordion, mặc định đóng (brochure vẫn là chính) --- */
+  .team .wrap { padding: .7rem .75rem; border-radius: 18px; }
+  .team__summary { min-height: 44px; padding: .3rem .25rem; }
+  .teamBox[open] .team__summary { margin-bottom: .7rem; }
+  .members { gap: .5rem; grid-template-columns: 1fr; }
+  .member__inner { padding: .7rem .75rem; }
+  .member__name { font-size: .9rem; }
+
+  /* --- Khối QR (chế độ nội bộ) --- */
+  .qrCard { grid-template-columns: 1fr; padding: 1rem .85rem; }
+  .qrCard__code { order: -1; }
+  #qrCanvas { max-width: min(68vw, 240px); }
+  .field__input { font-size: 1rem; min-height: 46px; }   /* ≥16px để iOS không tự phóng to */
+  .btnRow .btn { flex: 1 1 auto; }
+
+  /* --- Footer: 2 dòng, gọn --- */
+  .footer { padding: 1.1rem 0; }
+  .footer__inner { gap: .3rem .9rem; }
+  .footer__made { font-size: .84rem; }
+  .footer__names { display: none; }        /* bớt chữ vụn trên màn nhỏ */
+  .footer__note { display: none; }
+  .footer__top { font-size: .8rem; }
+
+  /* --- Nhãn "chế độ nội bộ": nhỏ, không che nội dung --- */
+  .toolsBadge { left: .5rem; bottom: max(.5rem, env(safe-area-inset-bottom)); max-width: calc(100% - 1rem); padding: .32rem .6rem; font-size: .72rem; gap: .3rem .45rem; }
+  body.is-tools .footer { padding-bottom: 3.4rem; }
+
+  /* --- Xem lớn trên điện thoại: ảnh giữa màn, nút điều hướng xuống dưới tầm ngón tay --- */
+  .lb__bar { gap: .5rem; padding: calc(.5rem + env(safe-area-inset-top)) max(.6rem, env(safe-area-inset-right)) .5rem max(.6rem, env(safe-area-inset-left)); }
+  .lb__caption { font-size: .8rem; }
+  .lb__tools { gap: .35rem; }
+  .lb__stage { padding: 0 .3rem calc(4.9rem + env(safe-area-inset-bottom)); }
+  .lb__stage img { border-radius: 6px; }
+  .lb__stage.is-zoomed img { width: min(2000px, 300vw); }   /* phóng để đọc chữ nhỏ trong brochure */
+  .lb__nav {
+    top: auto; transform: none;
+    bottom: calc(.7rem + env(safe-area-inset-bottom));
+    width: 46px; height: 46px;
+    background: rgba(255, 255, 255, .16); backdrop-filter: blur(6px);
+  }
+  .lb__nav--prev { left: max(.7rem, env(safe-area-inset-left)); }
+  .lb__nav--next { right: max(.7rem, env(safe-area-inset-right)); }
 }
 
 @media (max-width: 460px) {
-  .wrap, .wrap--wide { width: min(100% - 1.2rem, var(--wrap-wide)); }
+  .wrap { width: min(100% - 1.2rem, var(--wrap)); }
   .btnRow .btn { flex: 1 1 auto; }
+  .intro__sub { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+/* Màn rất nhỏ: chỉ giữ tên nhóm + tiêu đề, bỏ dòng mô tả */
+@media (max-width: 380px) {
+  .intro__sub { display: none; }
+  .intro__title { font-size: 1.4rem; }
+}
+
+/* --------------------------------------------- Thiết bị cảm ứng */
+/* Điện thoại / máy tính bảng: nút phải đủ lớn cho ngón tay (≥44px) dù màn
+   hình rộng bao nhiêu — iPad nằm ngang vẫn bấm dễ như khi dọc. */
+@media (pointer: coarse) {
+  .lang { min-height: 48px; }
+  .lang__btn { min-height: 44px; }
+  .btn { min-height: 44px; }
+  .faceJump__btn { min-height: 44px; }
+  .lb__btn { width: 46px; height: 46px; }
+  .lb__nav { width: 46px; height: 46px; }
+  .member__link { width: 34px; height: 34px; }
 }
 
 /* ------------------------------------------------------------- Print */
 @media print {
-  .topbar, .lb, .swipeHint, .btnRow, .face__toolbar, .footer__top, .toolsBadge, .showcase__hint { display: none !important; }
+  .topbar, .lb, .swipeHint, .btnRow, .face__toolbar, .footer__top, .toolsBadge, .showcase__hint,
+  .faceJump, .team__chev { display: none !important; }
   body { background: #fff; color: #000; font-size: 11pt; }
   .face, .qrCard, .member__inner { box-shadow: none; border-color: #bbb; break-inside: avoid; }
   .faces { display: block; }
@@ -541,41 +739,6 @@ html:not(.js) [data-qr-section] { display: none !important; }
   .face__frame img { max-height: 92vh; }
   .intro__group { color: #7a4405; }        /* giữ đủ tương phản khi in đen trắng */
   a[href]::after { content: ""; }          /* không in URL sau mỗi liên kết */
-}
-
-/* --------------------------------------------------------- Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #f2f5f9;
-    --body: #c2cbd9;
-    --muted: #93a0b3;
-    --bg: #0b1220;
-    --surface: #121b2c;
-    --surface-2: #1a2537;
-    --surface-glass: rgba(18, 27, 44, .72);
-    --border: #26334a;
-    --brand: #2fbfa4;
-    --brand-strong: #6ee0c8;
-    --brand-soft: #14322e;
-    --accent: #f0b455;
-    --accent-text: #f0b455;   /* 10.13:1 trên nền tối */
-    --accent-soft: #33260f;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 18px -12px rgba(0, 0, 0, .6);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, .45), 0 26px 50px -28px rgba(0, 0, 0, .8);
-    --shadow-lg: 0 18px 70px -46px rgba(0, 0, 0, .9);
-  }
-  body {
-    background:
-      radial-gradient(circle at 10% -12%, color-mix(in srgb, var(--brand-soft) 68%, transparent) 0 300px, transparent 560px),
-      radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--accent-soft) 58%, transparent) 0 250px, transparent 520px),
-      linear-gradient(135deg, #09101d, var(--bg) 48%, #0d1d20 100%);
-  }
-  .lang { background: color-mix(in srgb, var(--surface) 82%, var(--surface-2)); }
-  .lang__btn.is-active { background: var(--surface-2); }
-  .member:nth-child(2n) .member__avatar { color: #f3cd93; }
-  .member:nth-child(3n) .member__avatar { color: #c6b6f5; }
-  /* ảnh brochure luôn nằm trên nền trắng để giữ đúng màu bản in */
-  .face__frame, .face__open img { background: #fff; }
 }
 
 /* Người dùng tắt hiệu ứng chuyển động */

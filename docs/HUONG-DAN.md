@@ -12,6 +12,33 @@ Bạn sẽ thấy đúng thứ tự: một khối giới thiệu rất gọn (t�
 Nút **VI / EN** ở góc phải thanh trên cùng đổi ngôn ngữ; ảnh brochure cũng đổi theo bản tiếng Việt / tiếng Anh.
 Bấm vào bất kỳ ảnh brochure nào để mở xem lớn (phím ← → để đổi mặt, ESC để đóng, kéo/vuốt trên điện thoại).
 
+**Xem thử giao diện điện thoại ngay trên máy tính:** mở `tools/mobile-preview.html` (hoặc `http://localhost:4173/tools/mobile-preview.html`)
+— trang này đặt web vào 3 khung điện thoại 360 / 390 / 430 px và có nút đổi giữa chế độ người ngoài, `?tools=1` và bản tiếng Anh, khỏi phải thu nhỏ cửa sổ trình duyệt.
+
+## Điện thoại là người xem chính — trang được thiết kế cho màn hình nhỏ
+
+Người xem brochure hầu hết quét QR bằng điện thoại, nên giao diện ưu tiên màn hẹp trước:
+
+| Trên điện thoại | Trên máy tính |
+| --- | --- |
+| **Luôn sáng** (không theo chế độ tối của máy) | Cũng luôn sáng — một giao diện duy nhất |
+| Header cao ~56 px, chỉ còn logo + VI/EN | Header đầy đủ kèm mục lục |
+| Giới thiệu thu thành **mini card** ~130 px | Khối giới thiệu kiểu editorial |
+| 2 mặt xếp dọc, kèm **dải chọn mặt** `[1 Mặt trước] [2 Mặt sau]` dính dưới header | 2 mặt nằm cạnh nhau, không cần dải chọn |
+| Ảnh rộng ~96% màn hình, nút **Xem lớn** full chiều ngang | Khung rộng 1500 px, nút nằm cùng hàng với nhãn mặt |
+| **Thành viên** thu thành accordion, mặc định đóng | Danh sách thành viên mở sẵn |
+| Xem lớn: nút chuyển mặt đưa xuống dưới tầm ngón tay, vuốt ngang vẫn dùng được | Nút chuyển mặt ở hai bên ảnh |
+
+Chi tiết đáng nhớ:
+
+- Trang đặt `<meta name="color-scheme" content="light">` và **không** còn khối `prefers-color-scheme: dark` — dù điện thoại đang bật chế độ tối, web vẫn sáng để giữ đúng màu bản in. (`npm run check` sẽ báo nếu ai lỡ đổi lại.)
+- Bấm `[2 Mặt sau]` sẽ cuộn tới mặt sau; khi tự cuộn, dải chọn mặt cũng tự sáng theo mặt đang xem.
+- Ô nhập link trong khối nội bộ để `font-size: 1rem` để iOS **không tự phóng to** trang khi bấm vào.
+- Ai tắt hiệu ứng chuyển động trong cài đặt máy thì trang bỏ hiệu ứng cuộn mượt, hiệu ứng hiện dần.
+
+Muốn đổi ngưỡng màn hình: sửa 3 mốc trong `assets/css/style.css` — `1024px` (chuyển sang 1 cột + hiện dải chọn mặt), `720px` (giao diện điện thoại gọn) và `380px` (màn rất nhỏ).
+Nhớ sửa cả `initTeamBox()` trong `assets/js/app.js` nếu đổi mốc accordion thành viên cho khác `720px`.
+
 ## Bước 1 — Sửa thông tin nhóm (1 phút)
 
 Mở `assets/js/config.js`, sửa các mục:
@@ -36,6 +63,18 @@ Mở `assets/js/config.js`, sửa các mục:
    | `assets/brochure/en/mat-sau.jpg` | Mặt sau — tiếng Anh |
 
 3. Tải lại trang (Ctrl/Cmd + Shift + R). Chạy `npm run check` nếu muốn kiểm tra còn thiếu file nào.
+
+**Điện thoại tải nhanh hơn nhờ bản `.webp`:** web tự dò đuôi file và **ưu tiên `.webp`** trước `.png/.jpg`,
+nên chỉ cần để cạnh ảnh gốc một bản cùng tên (`mat-truoc.png` → `mat-truoc.webp`) là web dùng bản nhẹ hơn (thường nhẹ hơn ~70%).
+Bản `.webp` đang có sẵn trong repo; khi bạn **thay ảnh mới**, nhớ tạo lại:
+
+```bash
+npm i --no-save sharp            # một lần
+npm run images -- --write         # nén ảnh gốc + tạo lại các file .webp
+npm run check                     # mục 2 sẽ báo nếu .webp cũ hơn ảnh gốc
+```
+
+Không muốn dùng webp? Xoá các file `.webp` trong `assets/brochure/` — web tự quay về dùng `.png` như cũ.
 
 **Ảnh nặng quá?** Web tự dò đuôi file nên bạn không cần đổi code, nhưng ảnh > 1,5 MB sẽ tải chậm:
 
@@ -85,6 +124,10 @@ fileNames: {
 ## Bước 4 — Kiểm tra cuối cùng
 
 - [ ] Mở link bằng điện thoại: trang hiển thị đúng, ảnh brochure rõ, không tràn ngang.
+- [ ] Điện thoại đang bật **chế độ tối** mà trang vẫn sáng (đúng thiết kế), chữ đọc rõ.
+- [ ] Dải `[1 Mặt trước] [2 Mặt sau]` bấm được bằng ngón tay, cuộn tới đúng mặt.
+- [ ] Nút **Xem lớn** full chiều ngang, bấm mở ảnh; trong hộp xem lớn: vuốt ngang đổi mặt, chạm ảnh để phóng to, nút ✕ đóng được.
+- [ ] Khối “Thành viên nhóm” mặc định đóng trên điện thoại, bấm mở ra bình thường.
 - [ ] Nút VI/EN đổi đúng nội dung giao diện; nút phóng to ảnh hoạt động.
 - [ ] Thông tin thành viên hiển thị đúng theo nội dung nhóm muốn công khai.
 - [ ] Quét mã QR từ **bản in giấy** → mở đúng trang (thử 2 điện thoại, 2 app camera khác nhau).
@@ -146,6 +189,15 @@ mở lại trang là tự về link chính thức. Bấm **Về link chính th�
 
 **Sao tôi mở link mà không thấy nút tải QR?**
 Đúng như thiết kế — công cụ chỉ hiện ở chế độ nội bộ: thêm `?tools=1` vào cuối link (ví dụ `.../index.html?tools=1`).
+
+**Sao trên điện thoại không thấy danh sách thành viên?**
+Đúng như thiết kế: trên điện thoại khối thành viên thu thành accordion **mặc định đóng** để brochure là nhân vật chính — bấm vào dòng “Thành viên nhóm” là mở ra. Muốn mở sẵn trên điện thoại: sửa `initTeamBox()` trong `assets/js/app.js` (bỏ dòng `sync()`), hoặc đổi mốc `(max-width: 720px)`.
+
+**Sao thanh địa chỉ điện thoại lại màu xanh ngọc?**
+Đó là `theme-color` trong `index.html` — đổi mã màu ở đó nếu nhóm muốn tông khác.
+
+**Muốn hiện lại danh sách tên ở chân trang trên điện thoại?**
+Mở `assets/css/style.css`, trong khối `@media (max-width: 720px)`, xoá dòng `.footer__names { display: none; }`.
 
 **Có cần cài gì không?**
 Không. Web chạy bằng HTML/CSS/JS thuần, thư viện QR đã để sẵn trong `vendor/`. Các script trong `tools/` chỉ dùng module có sẵn của Node (không cần `npm install`).

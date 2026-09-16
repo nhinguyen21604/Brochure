@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xem thử giao diện điện thoại — Brochure nhóm 1</title>
+<!-- Trang dành cho nhóm khi làm việc, không cho Google đánh chỉ mục -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --ink: #0f172a; --body: #3b4759; --muted: #5f6a7d;
+    --bg: #f4f3f0; --surface: #fff; --border: #e2ded4;
+    --brand: #0e7c6b; --brand-strong: #0a5f52; --brand-soft: #e4f4f0;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 1.4rem 1.2rem 2.5rem; background: var(--bg); color: var(--body);
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-size: 15px; line-height: 1.55;
+  }
+  h1 { margin: 0 0 .2rem; font-size: 1.2rem; color: var(--ink); }
+  .lead { margin: 0 0 1rem; color: var(--muted); font-size: .9rem; max-width: 78ch; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .4rem;
+    margin-bottom: 1.2rem; padding: .55rem .7rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    box-shadow: 0 8px 22px -18px rgba(15, 23, 42, .5);
+  }
+  .toolbar span.label { font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 .3rem 0 .5rem; }
+  button {
+    font: inherit; font-size: .84rem; font-weight: 650; cursor: pointer;
+    min-height: 44px; padding: .4rem .95rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  }
+  button:hover { border-color: var(--brand); color: var(--brand-strong); }
+  button[aria-pressed="true"] { background: var(--brand-soft); border-color: var(--brand); color: var(--brand-strong); }
+  .frames { display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: flex-start; }
+  .frame { background: var(--surface); border: 1px solid var(--border); border-radius: 26px; padding: .55rem; box-shadow: 0 20px 45px -35px rgba(15, 23, 42, .55); }
+  .frame__head { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; padding: .15rem .35rem .5rem; }
+  .frame__size { font-weight: 700; color: var(--ink); font-size: .86rem; }
+  .frame__note { font-size: .76rem; color: var(--muted); }
+  .frame__head a { font-size: .76rem; color: var(--brand-strong); }
+  iframe {
+    display: block; width: 360px; height: 760px; border: 1px solid var(--border);
+    border-radius: 20px; background: #fff;
+  }
+  .tip { margin-top: 1.4rem; font-size: .82rem; color: var(--muted); max-width: 80ch; }
+  .tip code { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: .05rem .35rem; }
+</style>
+</head>
+<body>
+  <h1>Xem thử giao diện điện thoại</h1>
+  <p class="lead">
+    Trang này nhúng chính <code>index.html</code> vào 3 khung rộng như điện thoại thật, để nhóm kiểm tra
+    bố cục màn hẹp mà không cần thu nhỏ cửa sổ trình duyệt hay mở máy thật.
+    Khung nào cũng cuộn được bên trong — hãy thử cuộn và bấm như đang dùng điện thoại.
+  </p>
+
+  <div class="toolbar" role="group" aria-label="Chế độ xem thử">
+    <span class="label">Chế độ</span>
+    <button type="button" data-mode="public" aria-pressed="true">Người ngoài · VI</button>
+    <button type="button" data-mode="public-en" aria-pressed="false">Người ngoài · EN</button>
+    <button type="button" data-mode="tools" aria-pressed="false">Nội bộ · ?tools=1</button>
+  </div>
+
+  <div class="frames" id="frames">
+    <div class="frame" data-width="360">
+      <div class="frame__head">
+        <span class="frame__size">360 px</span>
+        <span class="frame__note">điện thoại nhỏ</span>
+        <a href="../index.html" target="_blank" rel="noopener">mở riêng</a>
+      </div>
+      <iframe src="../index.html" title="Bản xem thử 360px" height="760" loading="lazy"></iframe>
+    </div>
+    <div class="frame" data-width="390">
+      <div class="frame__head">
+        <span class="frame__size">390 px</span>
+        <span class="frame__note">iPhone / Android phổ biến</span>
+        <a href="../index.html" target="_blank" rel="noopener">mở riêng</a>
+      </div>
+      <iframe src="../index.html" title="Bản xem thử 390px" height="760" loading="lazy"></iframe>
+    </div>
+    <div class="frame" data-width="430">
+      <div class="frame__head">
+        <span class="frame__size">430 px</span>
+        <span class="frame__note">máy lớn</span>
+        <a href="../index.html" target="_blank" rel="noopener">mở riêng</a>
+      </div>
+      <iframe src="../index.html" title="Bản xem thử 430px" height="760" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <p class="tip">
+    Mẹo: trong khung, thử <strong>bấm ảnh brochure</strong> để mở hộp xem lớn, <strong>vuốt/kéo ngang</strong> để đổi mặt,
+    và bấm dòng <strong>“Thành viên nhóm”</strong> để mở accordion.
+    Muốn kiểm tra bản tiếng Anh thì chọn chế độ “Người ngoài · EN” ở trên.
+    Trang này chỉ để xem thử, không nằm trong luồng của người xem.
+  </p>
+
+  <script>
+    (function () {
+      "use strict";
+      const queries = { "public": "", "public-en": "?lang=en", "tools": "?tools=1" };
+      const buttons = Array.from(document.querySelectorAll("[data-mode]"));
+      const frames = Array.from(document.querySelectorAll(".frame"));
+
+      function apply(mode) {
+        const suffix = queries[mode] != null ? queries[mode] : "";
+        frames.forEach((frame) => {
+          const width = frame.dataset.width;
+          const iframe = frame.querySelector("iframe");
+          const link = frame.querySelector("a");
+          iframe.style.width = width + "px";
+          iframe.src = `../index.html${suffix}`;
+          link.href = `../index.html${suffix}`;
+          frame.querySelector(".frame__size").textContent = width + " px";
+        });
+        buttons.forEach((b) => b.setAttribute("aria-pressed", b.dataset.mode === mode ? "true" : "false"));
+      }
+
+      buttons.forEach((btn) => btn.addEventListener("click", () => apply(btn.dataset.mode)));
+      apply("public");
+    })();
+  </script>
+</body>
+</html>

@@ -61,6 +61,34 @@ for (const theme of themes) {
 }
 console.log(`   → ${found} ảnh đã có, ${missing} ảnh còn thiếu.`);
 
+// Bản .webp (nếu có) giúp điện thoại mở nhanh hơn 3–4 lần — nhưng chỉ đúng khi
+// nó được tạo SAU ảnh gốc. Ảnh gốc mới hơn nghĩa là bản .webp đang lỗi thời.
+{
+  const dirs = themes.map((t) => path.join(ROOT, b.root || "assets/brochure", t)).filter((d) => fs.existsSync(d));
+  let checked = 0;
+  let stale = 0;
+  for (const dir of dirs) {
+    for (const file of fs.readdirSync(dir)) {
+      if (!/\.(jpe?g|png|avif)$/i.test(file)) continue;
+      const src = path.join(dir, file);
+      const webp = path.join(dir, file.replace(/\.[^.]+$/, ".webp"));
+      checked++;
+      if (!fs.existsSync(webp)) {
+        console.log(warn(`[webp] ${path.relative(ROOT, webp)} chưa có → chạy: npm run images -- --write (nhẹ hơn ~70%)`));
+        continue;
+      }
+      if (fs.statSync(webp).mtimeMs < fs.statSync(src).mtimeMs) {
+        stale++;
+        console.log(warn(`[webp] ${path.relative(ROOT, webp)} CŨ hơn ảnh gốc → chạy lại: npm run images -- --write`));
+      }
+    }
+  }
+  if (checked && !stale) {
+    console.log(ok(`Bản .webp đều mới hơn ảnh gốc — web sẽ tải bản nhẹ cho điện thoại.`));
+  }
+  if (stale) problems.push(bad("Có bản .webp cũ hơn ảnh gốc — người xem sẽ thấy ảnh phiên bản cũ. Chạy: npm run images -- --write"));
+}
+
 console.log("\n=== 3. Mã QR cố định (assets/qr) ===");
 {
   const qrDir = path.join(ROOT, "assets", "qr");
@@ -182,6 +210,53 @@ console.log("\n=== 6. Chặn Google đánh chỉ mục (noindex) ===");
     }
   }
   console.log("   → Nếu muốn trang được Google tìm thấy, hãy xóa 2 thẻ noindex này.");
+}
+
+console.log("\n=== 7. Giao diện điện thoại (mobile-first) ===");
+{
+  const indexPath = path.join(ROOT, "index.html");
+  const cssPath = path.join(ROOT, "assets", "css", "style.css");
+  const html = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, "utf8") : "";
+  const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
+
+  // 1) luôn sáng: không tự chuyển tối theo cài đặt của điện thoại
+  if (/<meta[^>]+name=["']color-scheme["'][^>]*content=["']light["']/i.test(html)) {
+    console.log(ok('index.html — color-scheme="light": trang luôn ở giao diện sáng'));
+  } else {
+    console.log(bad('index.html thiếu <meta name="color-scheme" content="light"> — trang có thể tự chuyển tối'));
+    problems.push(bad('Thiếu thẻ color-scheme "light" trong index.html'));
+  }
+  if (/prefers-color-scheme:\s*dark/.test(css)) {
+    console.log(bad("style.css còn khối @media (prefers-color-scheme: dark) — trang sẽ tối trên máy bật dark mode"));
+    problems.push(bad("style.css còn khối dark mode — xoá nếu muốn trang luôn sáng"));
+  } else {
+    console.log(ok("style.css — không còn khối dark mode"));
+  }
+
+  // 2) các phần chỉ dành cho điện thoại phải còn nguyên
+  const pieces = [
+    ["index.html", 'id="faceJump"', "dải chọn mặt brochure"],
+    ["index.html", 'id="teamBox"', "accordion thành viên"],
+    ["assets/css/style.css", ".faceJump", "kiểu dáng dải chọn mặt"],
+    ["assets/js/app.js", "renderFaceJump", "logic dải chọn mặt"],
+    ["assets/js/app.js", "initTeamBox", "logic accordion thành viên"],
+  ];
+  for (const [rel, needle, what] of pieces) {
+    const txt = rel.endsWith(".css") ? css : rel.endsWith(".js")
+      ? (fs.existsSync(path.join(ROOT, rel)) ? fs.readFileSync(path.join(ROOT, rel), "utf8") : "")
+      : html;
+    if (txt.includes(needle)) console.log(ok(`${rel} — ${what}`));
+    else {
+      console.log(warn(`${rel} thiếu "${needle}" (${what}) — giao diện điện thoại có thể đã bị sửa mất`));
+    }
+  }
+
+  // 3) ô nhập trên điện thoại phải ≥16px, nếu không iOS sẽ tự phóng to trang
+  if (/@media \(max-width: 720px\)[\s\S]{0,4000}?\.field__input \{ font-size: 1rem/.test(css)) {
+    console.log(ok("Ô nhập link đủ 16px trên điện thoại — iOS không tự phóng to"));
+  } else {
+    console.log(warn("Chưa thấy quy tắc font-size 1rem cho .field__input trên điện thoại (iOS có thể tự phóng to)"));
+  }
 }
 
 console.log("\n=== Kết luận ===");

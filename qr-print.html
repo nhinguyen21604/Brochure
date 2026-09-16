@@ -7,10 +7,12 @@
 <!-- noindex: trang in QR chỉ dành cho nhóm, không cho Google đánh chỉ mục -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
+<!-- Luôn sáng, không theo chế độ tối của điện thoại (đồng bộ với trang chính) -->
+<meta name="color-scheme" content="light">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap">
 <style>
-  :root { --ink:#0f172a; --muted:#64748b; --brand:#0e7c6b; --line:#e2e8f0; }
+  :root { --ink:#0f172a; --muted:#64748b; --brand:#0e7c6b; --line:#e2e8f0; color-scheme: light; }
   * { box-sizing: border-box; }
   body {
     margin: 0; padding: 2rem 1.25rem; background: #f6f7f9; color: var(--ink);
@@ -26,7 +28,9 @@
   .link { font-size: .85rem; color: var(--brand); word-break: break-all; margin: 0 0 1.4rem; }
   .rows { display: grid; gap: .55rem; text-align: left; font-size: .85rem; color: var(--muted); }
   .rows label { display: flex; align-items: center; gap: .5rem; }
-  input[type=url] { flex: 1; font: inherit; font-size: .85rem; padding: .5rem .7rem; border: 1px solid var(--line); border-radius: 10px; }
+  /* font-size ≥ 16px để iOS không tự phóng to khi bấm vào ô nhập */
+  input[type=url] { flex: 1; font: inherit; font-size: 1rem; padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 10px; }
+  button, .btn { min-height: 44px; }
   .btns { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1.3rem; }
   button, .btn { font: inherit; font-weight: 600; font-size: .88rem; padding: .6rem 1.1rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; text-decoration: none; }
   button.primary { background: var(--brand); border-color: var(--brand); color: #fff; }

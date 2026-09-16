@@ -175,17 +175,34 @@
     return out;
   }
 
-  /** Thử lần lượt các đường dẫn, gọi onOk(src) hoặc onFail(tried). */
-  function resolveImage(candidates, onOk, onFail) {
+  /** Thử lần lượt các đường dẫn, gọi onOk(src) hoặc onFail(tried).
+   *  priority = true → báo trình duyệt tải sớm (dùng cho mặt đầu tiên, thứ
+   *  người xem nhìn thấy ngay khi mở link/QR). */
+  function resolveImage(candidates, onOk, onFail, priority) {
     let i = 0;
     (function next() {
       if (i >= candidates.length) return onFail(candidates);
       const src = candidates[i++];
       const probe = new Image();
+      if (priority) {
+        try { probe.fetchPriority = "high"; } catch (err) { /* trình duyệt cũ: bỏ qua */ }
+      }
       probe.onload = () => onOk(src);
       probe.onerror = next;
       probe.src = src;
     })();
+  }
+
+  /** Màn hẹp thì 2 mặt xếp dọc → cần dải chọn mặt + theo dõi mặt đang xem. */
+  function isNarrow() {
+    return typeof window.matchMedia === "function"
+      ? window.matchMedia("(max-width: 1024px)").matches
+      : window.innerWidth <= 1024;
+  }
+
+  function prefersReducedMotion() {
+    return typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
   /* ---------------------------------------------------------- Brochure */
@@ -209,6 +226,7 @@
     state.faces.forEach((face, idx) => {
       const card = document.createElement("figure");
       card.className = "face";
+      card.id = `face-${face.key}`;
       card.dataset.index = String(idx);
       card.dataset.number = String(idx + 1).padStart(2, "0");
 
@@ -220,7 +238,9 @@
 
       const frame = document.createElement("div");
       frame.className = "face__frame";
-      frame.innerHTML = `<div class="face__loading" role="status" aria-live="polite">…</div>`;
+      frame.innerHTML =
+        `<div class="face__loading" role="status" aria-live="polite">` +
+        `${escapeHtml(t("brochure.loading"))}</div>`;
 
       const actions = document.createElement("div");
       actions.className = "face__actions";
@@ -254,9 +274,87 @@
           resolved[cacheKey] = null;   // nhớ là không có ảnh → lần sau khỏi dò lại
           probing[cacheKey].forEach(({ card: c, face: f }) => paintMissing(c, f));
           delete probing[cacheKey];
-        }
+        },
+        idx === 0                      // mặt đầu: tải trước để mở trang là thấy ngay
       );
     });
+
+    renderFaceJump();
+  }
+
+  /* ---------------------------------------------- Dải chọn mặt (màn hẹp) */
+  const jump = { buttons: [], observer: null };
+
+  function renderFaceJump() {
+    const host = $("#faceJump");
+    if (!host) return;
+    if (jump.observer) { jump.observer.disconnect(); jump.observer = null; }
+    host.innerHTML = "";
+    jump.buttons = [];
+
+    // 1 mặt thì không cần dải chọn
+    if (state.faces.length < 2) {
+      host.hidden = true;
+      return;
+    }
+
+    state.faces.forEach((face, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "faceJump__btn";
+      btn.dataset.index = String(idx);
+      btn.innerHTML =
+        `<span class="faceJump__num" aria-hidden="true">${idx + 1}</span>` +
+        `<span>${escapeHtml(face.label)}</span>`;
+      btn.setAttribute("aria-label", `${idx + 1}. ${face.label}`);
+      btn.addEventListener("click", () => scrollToFace(idx));
+      host.appendChild(btn);
+      jump.buttons.push(btn);
+    });
+
+    host.hidden = false;
+    const active = state.index >= 0 && state.index < jump.buttons.length ? state.index : 0;
+    setActiveFace(active);
+    watchFaces();
+  }
+
+  function setActiveFace(idx) {
+    jump.buttons.forEach((btn, i) => {
+      const on = i === idx;
+      btn.classList.toggle("is-active", on);
+      if (on) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
+    });
+  }
+
+  function scrollToFace(idx) {
+    setActiveFace(idx);   // phản hồi ngay, không chờ cuộn xong
+    const card = document.getElementById(`face-${state.faces[idx].key}`);
+    if (!card || typeof card.scrollIntoView !== "function") return;
+    card.scrollIntoView({
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      block: "start",
+    });
+  }
+
+  /** Đang cuộn tới mặt nào thì sáng mặt đó trong dải chọn. */
+  function watchFaces() {
+    const host = $("#faceJump");
+    if (jump.observer) { jump.observer.disconnect(); jump.observer = null; }
+    if (!host || !isNarrow() || !("IntersectionObserver" in window)) return;
+    const cards = state.faces.map((f) => document.getElementById(`face-${f.key}`)).filter(Boolean);
+    if (cards.length < 2) return;
+    jump.observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const idx = Number(entry.target.dataset.index);
+          if (!Number.isNaN(idx)) setActiveFace(idx);
+        });
+      },
+      { rootMargin: "-35% 0px -50% 0px" }
+    );
+    cards.forEach((c) => jump.observer.observe(c));
   }
 
   function paint(card, face, src) {
@@ -273,8 +371,13 @@
     const img = document.createElement("img");
     img.src = src;
     img.alt = `${face.label} — ${tr(CFG.title)}`;
-    img.loading = "lazy";
     img.decoding = "async";
+    // Mặt đầu là thứ người xem thấy ngay → tải ngay và ưu tiên cao.
+    const first = Number(card.dataset.index) === 0;
+    img.loading = first ? "eager" : "lazy";
+    if (first) {
+      try { img.fetchPriority = "high"; } catch (err) { /* trình duyệt cũ: bỏ qua */ }
+    }
 
     openBtn.appendChild(img);
     openBtn.addEventListener("click", () => lightbox.open(Number(card.dataset.index)));
@@ -292,7 +395,7 @@
 
     const count = document.createElement("span");
     count.className = "face__count";
-    count.textContent = `${Number(card.dataset.index) + 1}/${state.faces.length} · ${face.label}`;
+    count.textContent = `${face.label} · ${Number(card.dataset.index) + 1}/${state.faces.length}`;
 
     toolbar.append(enlarge, count);
 
@@ -387,6 +490,7 @@
     },
     open(index) {
       state.index = index;
+      if (isNarrow()) this.syncJump();
       this.lastFocus = document.activeElement;
       this.el.hidden = false;
       document.body.classList.add("no-scroll");
@@ -398,7 +502,7 @@
     close() {
       this.el.hidden = true;
       document.body.classList.remove("no-scroll");
-      $(".lb__stage", this.el).classList.remove("is-zoomed");
+      this.setZoom(false);
       if (this.lastFocus && this.lastFocus.isConnected && typeof this.lastFocus.focus === "function") {
         this.lastFocus.focus();
       }
@@ -406,13 +510,23 @@
     },
     /** Bật/tắt phóng to (con trỏ chuột đổi theo class .is-zoomed trong CSS). */
     toggleZoom() {
-      $(".lb__stage", this.el).classList.toggle("is-zoomed");
+      this.setZoom(!$(".lb__stage", this.el).classList.contains("is-zoomed"));
+    },
+    /** Đặt trạng thái phóng to + cập nhật nhãn nút cho trình đọc màn hình. */
+    setZoom(on) {
+      $(".lb__stage", this.el).classList.toggle("is-zoomed", !!on);
+      const btn = $("[data-lb-zoom]", this.el);
+      if (!btn) return;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      const key = on ? "lightbox.zoomOut" : "lightbox.zoomIn";
+      btn.setAttribute("aria-label", t(key));
+      btn.setAttribute("title", t(key));
     },
     /** Giữ phím Tab trong hộp thoại, không cho chạy ra sau lưng.
      *  Lưu ý: KHÔNG lọc bằng offsetParent — các nút này nằm trong khối
      *  position: fixed nên offsetParent luôn là null và sẽ bị lọc sạch. */
     trapFocus(e) {
-      const focusables = $$(".lb__btn", this.el).filter((el) => !el.hidden);
+      const focusables = $$(".lb__btn, .lb__nav", this.el).filter((el) => !el.hidden);
       if (!focusables.length) return;
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
@@ -429,9 +543,13 @@
       const n = state.faces.length;
       if (!n) return;
       state.index = (state.index + dir + n) % n;
-      const stage = $(".lb__stage", this.el);
-      stage.classList.remove("is-zoomed");
+      this.setZoom(false);
       this.paint();
+      if (isNarrow()) this.syncJump();   // đổi mặt trong hộp xem lớn → dải chọn mặt theo luôn
+    },
+    /** Đồng bộ dải chọn mặt với mặt đang mở trong hộp xem lớn. */
+    syncJump() {
+      if (jump.buttons.length > state.index) setActiveFace(state.index);
     },
     paint() {
       const face = state.faces[state.index];
@@ -452,7 +570,9 @@
         )}</div>`;
         $("[data-lb-open]", this.el).hidden = true;
       }
-      $(".lb__caption", this.el).textContent = `${state.index + 1}/${state.faces.length} · ${face.label}`;
+      const caption = $("[data-lb-caption]", this.el) || $(".lb__caption", this.el);
+      if (caption) caption.textContent = `${face.label} · ${state.index + 1}/${state.faces.length}`;
+      this.setZoom(false);
     },
   };
 
@@ -651,6 +771,37 @@
     };
   }
 
+  /* ------------------------- Thành viên: accordion trên điện thoại */
+  /* Máy tính: mở sẵn như cũ. Điện thoại: đóng sẵn để brochure không bị đẩy
+     xuống dưới; ai cần xem thì bấm một lần là thấy danh sách. */
+  function initTeamBox() {
+    const box = $("#teamBox");
+    if (!box) return;
+    box.open = true;
+    if (typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(max-width: 720px)");
+    const sync = () => { box.open = !mq.matches; };
+    sync();
+    if (typeof mq.addEventListener === "function") mq.addEventListener("change", sync);
+    else if (typeof mq.addListener === "function") mq.addListener(sync);
+    // in trang (Ctrl/Cmd + P) thì mở sẵn cho đủ nội dung
+    window.addEventListener("beforeprint", () => { box.open = true; });
+  }
+
+  /** Đổi cỡ màn hình / xoay máy: bật lại phần chỉ dành cho màn hẹp. */
+  function initResponsive() {
+    let narrow = isNarrow();
+    window.addEventListener(
+      "resize",
+      debounce(() => {
+        const now = isNarrow();
+        if (now === narrow) return;
+        narrow = now;
+        watchFaces();
+      }, 200)
+    );
+  }
+
   function initReveal() {
     const items = $$(".reveal");
     if (!items.length) return;
@@ -717,6 +868,8 @@
     );
     const year = $("#year");
     if (year) year.textContent = String(new Date().getFullYear());
+    initTeamBox();
+    initResponsive();
     initReveal();
     initScrollSpy();
     initHeaderState();

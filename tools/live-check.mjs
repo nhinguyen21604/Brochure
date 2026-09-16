@@ -105,6 +105,32 @@ for (const [label, url, wantType] of assets) {
   if (!good) process.exitCode = 1;
 }
 
+/* Ảnh brochure: đã lên mạng chưa, và đang dùng bản nào (ưu tiên .webp cho nhẹ) */
+{
+  const b = cfg.brochure || {};
+  const exts = b.extensions || ["webp", "avif", "jpg", "jpeg", "png"];
+  for (const langKey of ["vi", "en"]) {
+    for (const face of b.faces || []) {
+      const names = ((b.fileNames || {})[langKey] || {})[face.key] || [face.key];
+      const candidates = names.flatMap((n) => exts.map((e) => `${b.root || "assets/brochure"}/${langKey}/${n}.${e}`));
+      let hit = null;
+      for (const rel of candidates) {
+        const r = await headOk(new URL(rel, base).href);
+        if (r.status === 200 && r.size > 1000) { hit = rel; break; }
+      }
+      const label = `ảnh [${langKey}/${face.key}]`;
+      if (!hit) {
+        console.log(bad(`${label}: không tải được ảnh nào — người xem sẽ thấy "nội dung đang cập nhật"`));
+        process.exitCode = 1;
+      } else if (/\.webp$/.test(hit)) {
+        console.log(ok(`${label}: bản .webp nhẹ đã lên mạng (${hit.split("/").pop()})`));
+      } else {
+        console.log(warn(`${label}: đang dùng ${hit.split("/").pop()} — chưa có bản .webp trên mạng nên tải chậm hơn (chạy: npm run images -- --write rồi deploy lại)`));
+      }
+    }
+  }
+}
+
 /* ảnh xem trước khi chia sẻ link (og:image) — phải là link tuyệt đối và tải được */
 const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
 if (!ogMatch) {

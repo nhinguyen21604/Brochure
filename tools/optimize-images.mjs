@@ -1,8 +1,13 @@
 /**
  * optimize-images.mjs — kiểm tra & nén ảnh brochure trong assets/brochure/.
  *
- *   npm run images              → chỉ BÁO CÁO (không sửa gì)
- *   npm run images -- --write   → nén thật, giữ bản gốc cạnh bên (.orig)
+ *   npm run images                       → chỉ BÁO CÁO (không sửa gì)
+ *   npm run images -- --write            → nén thật + tạo bản .webp nhẹ cho web
+ *   npm run images -- --write --no-webp  → chỉ nén, không tạo .webp
+ *
+ * Bản .webp cùng tên (mat-truoc.png → mat-truoc.webp) được web ưu tiên dùng
+ * vì nhẹ hơn PNG 3–4 lần — quan trọng với người xem bằng 4G. Nhớ chạy lại
+ * --write mỗi khi thay ảnh mới, để bản .webp không bị cũ.
  *   npm run images -- --write --max 2000 --quality 84
  *
  * Phần báo cáo chạy bằng Node thuần (không cần cài gì).
@@ -24,6 +29,9 @@ const MAX_SIDE = Number(arg("max", 2400));
 const MIN_SIDE = Number(arg("min", 1200));
 const QUALITY = Number(arg("quality", 82));
 const BUDGET_KB = Number(arg("budget", 1500));
+const WEBP_QUALITY = Number(arg("webp-quality", 84));
+const NO_WEBP = argv.includes("--no-webp");
+const FORCE = argv.includes("--force");
 
 const ok = (s) => `\x1b[32m✔\x1b[0m ${s}`;
 const warn = (s) => `\x1b[33m▲\x1b[0m ${s}`;
@@ -94,8 +102,16 @@ if (!found.length) {
   process.exit(0);
 }
 
+const isWebp = (f) => /\.webp$/i.test(f);
+const webpOf = (f) => f.replace(/\.[^.]+$/, ".webp");
+const byPath = new Map(found.map((f) => [f.full, f]));
+
 let advice = 0;
 for (const item of found) {
+  // bản .webp do script tạo (có ảnh gốc cùng tên) sẽ được in chung với ảnh gốc
+  const companion = !isWebp(item.full) ? byPath.get(webpOf(item.full)) : null;
+  if (isWebp(item.full) && byPath.has(item.full.replace(/\.webp$/i, ".png"))) continue;
+
   const kb = item.size / 1024;
   const dims = item.dims ? `${item.dims.width}×${item.dims.height}` : "không đọc được kích thước";
   const notes = [];
@@ -106,7 +122,19 @@ for (const item of found) {
     else if (long < MIN_SIDE) { notes.push(`dài cạnh ${long} px < ${MIN_SIDE} → hơi mờ khi bấm xem lớn`); }
   }
   const line = `${item.rel.padEnd(34)} ${kb.toFixed(0).padStart(5)} KB  ${dims}`;
-  console.log(notes.length ? warn(line + "  → " + notes.join("; ")) : ok(line));
+  if (companion) {
+    const webpKb = companion.size / 1024;
+    const saved = kb > 0 ? Math.round((1 - webpKb / kb) * 100) : 0;
+    console.log(
+      (notes.length ? warn(line + "  → " + notes.join("; ")) : ok(line)) +
+      `\n${" ".repeat(3)}└─ .webp dùng khi xem web: ${webpKb.toFixed(0)} KB (nhẹ hơn ${saved}%)`
+    );
+  } else if (!isWebp(item.full)) {
+    notes.push("chưa có bản .webp nhẹ hơn → chạy: npm run images -- --write");
+    console.log(warn(line + "  → " + notes.join("; ")));
+  } else {
+    console.log(notes.length ? warn(line + "  → " + notes.join("; ")) : ok(line));
+  }
 }
 
 console.log(
@@ -130,8 +158,11 @@ try {
   process.exit(1);
 }
 
+/* Ảnh nguồn = ảnh do nhóm xuất ra (png/jpg), bỏ qua file .webp do script tạo */
+const sources = found.filter((it) => !(isWebp(it.full) && byPath.has(it.full.replace(/\.webp$/i, ".png"))));
+
 console.log(`\n=== Nén ảnh (dài cạnh tối đa ${MAX_SIDE} px, chất lượng ${QUALITY}) ===`);
-for (const item of found) {
+for (const item of sources) {
   const kbBefore = item.size / 1024;
   if (kbBefore <= BUDGET_KB && item.dims && Math.max(item.dims.width, item.dims.height) <= MAX_SIDE) {
     console.log(ok(`${item.rel} — đã ổn, bỏ qua`));
@@ -150,4 +181,25 @@ for (const item of found) {
   const kbAfter = fs.statSync(item.full).size / 1024;
   console.log(ok(`${item.rel}: ${kbBefore.toFixed(0)} KB → ${kbAfter.toFixed(0)} KB  (bản gốc: ${path.basename(backup)})`));
 }
+
+/* Bản .webp cho web: nhẹ hơn hẳn PNG nên điện thoại mở nhanh hơn. */
+if (NO_WEBP) {
+  console.log(warn("\nBỏ qua bản .webp (--no-webp)."));
+} else {
+  console.log(`\n=== Bản .webp cho web (chất lượng ${WEBP_QUALITY}) ===`);
+  for (const item of sources) {
+    if (isWebp(item.full)) continue;                 // đã là webp sẵn
+    const target = webpOf(item.full);
+    const fresh = fs.existsSync(target) && fs.statSync(target).mtimeMs >= fs.statSync(item.full).mtimeMs;
+    if (fresh && !FORCE) {
+      console.log(ok(`${path.relative(ROOT, target)} — đã mới, bỏ qua`));
+      continue;
+    }
+    await sharp(item.full).rotate().webp({ quality: WEBP_QUALITY, effort: 6 }).toFile(target);
+    const kbAfter = fs.statSync(target).size / 1024;
+    const saved = Math.round((1 - fs.statSync(target).size / fs.statSync(item.full).size) * 100);
+    console.log(ok(`${path.relative(ROOT, target)}: ${kbAfter.toFixed(0)} KB (nhẹ hơn ${saved}% so với ảnh gốc)`));
+  }
+}
+
 console.log("\n✔ Xong. Mở lại trang để xem: npm start\n");
