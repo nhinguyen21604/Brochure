@@ -9,7 +9,7 @@ npm start          # rồi mở http://localhost:4173/
 ```
 
 Bạn sẽ thấy đúng thứ tự: một khối giới thiệu rất gọn (tên nhóm + tiêu đề) → **2 mặt brochure chiếm gần trọn màn hình** → dải gọn 4 thành viên → *(chỉ ở chế độ nội bộ)* khối mã QR.
-Nút **VI / EN** ở góc phải thanh trên cùng đổi ngôn ngữ; ảnh brochure cũng đổi theo bản tiếng Việt / tiếng Anh.
+Nút đổi ngôn ngữ nằm **giữa trang, ngay dưới thanh trên cùng** — hàng riêng có nhãn “Ngôn ngữ” rồi tới **[Tiếng Việt] [English]** (ghi tên đầy đủ, không viết tắt; bản đang xem được tô đậm kèm dấu ✓); ảnh brochure cũng đổi theo bản tiếng Việt / tiếng Anh.
 Bấm vào bất kỳ ảnh brochure nào để mở xem lớn (phím ← → để đổi mặt, ESC để đóng, kéo/vuốt trên điện thoại).
 
 **Xem thử giao diện điện thoại ngay trên máy tính:** mở `tools/mobile-preview.html` (hoặc `http://localhost:4173/tools/mobile-preview.html`)
@@ -22,7 +22,7 @@ Người xem brochure hầu hết quét QR bằng điện thoại, nên giao di�
 | Trên điện thoại | Trên máy tính |
 | --- | --- |
 | **Luôn sáng** (không theo chế độ tối của máy) | Cũng luôn sáng — một giao diện duy nhất |
-| Header cao ~56 px, chỉ còn logo + VI/EN | Header đầy đủ kèm mục lục |
+| Header cao ~56 px, chỉ còn logo canh giữa; nút **[Tiếng Việt] [English]** ở hàng riêng canh giữa bên dưới | Header đầy đủ kèm mục lục |
 | Giới thiệu thu thành **mini card** ~130 px | Khối giới thiệu kiểu editorial |
 | 2 mặt xếp dọc, kèm **dải chọn mặt** `[1 Mặt trước] [2 Mặt sau]` dính dưới header | 2 mặt nằm cạnh nhau, không cần dải chọn |
 | Ảnh rộng ~96% màn hình, nút **Xem lớn** full chiều ngang | Khung rộng 1500 px, nút nằm cùng hàng với nhãn mặt |
@@ -128,7 +128,7 @@ fileNames: {
 - [ ] Dải `[1 Mặt trước] [2 Mặt sau]` bấm được bằng ngón tay, cuộn tới đúng mặt.
 - [ ] Nút **Xem lớn** full chiều ngang, bấm mở ảnh; trong hộp xem lớn: vuốt ngang đổi mặt, chạm ảnh để phóng to, nút ✕ đóng được.
 - [ ] Khối “Thành viên nhóm” mặc định đóng trên điện thoại, bấm mở ra bình thường.
-- [ ] Nút VI/EN đổi đúng nội dung giao diện; nút phóng to ảnh hoạt động.
+- [ ] Nút **[Tiếng Việt] [English]** ghi rõ chữ (không viết tắt), bản đang xem tô đậm + ✓, bấm đổi đúng nội dung giao diện; nút phóng to ảnh hoạt động.
 - [ ] Thông tin thành viên hiển thị đúng theo nội dung nhóm muốn công khai.
 - [ ] Quét mã QR từ **bản in giấy** → mở đúng trang (thử 2 điện thoại, 2 app camera khác nhau).
 - [ ] `npm run live` báo HTTP 200 — link QR thật sự mở được.

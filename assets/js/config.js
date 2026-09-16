@@ -124,6 +124,13 @@ window.SITE_CONFIG = {
       "nav.team": "Thành viên",
       "nav.qr": "Mã QR",
 
+      // Nhãn cho nút đổi ngôn ngữ (tên ngôn ngữ luôn giữ nguyên: "Tiếng Việt" / "English")
+      "lang.caption": "Ngôn ngữ",
+      "lang.group": "Chọn ngôn ngữ",
+      "lang.current": "đang được chọn",
+      "lang.switchTo": "Chuyển sang",
+      "lang.changed": "Đã chuyển sang",
+
       "info.course": "Môn học",
       "info.class": "Lớp",
       "info.lecturer": "Giảng viên",
@@ -185,6 +192,13 @@ window.SITE_CONFIG = {
       "nav.brochure": "Brochure",
       "nav.team": "Team",
       "nav.qr": "QR code",
+
+      // Labels for the language switcher (language names stay as-is: "Tiếng Việt" / "English")
+      "lang.caption": "Language",
+      "lang.group": "Choose language",
+      "lang.current": "selected",
+      "lang.switchTo": "Switch to",
+      "lang.changed": "Switched to",
 
       "info.course": "Course",
       "info.class": "Class",
